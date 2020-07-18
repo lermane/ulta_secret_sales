@@ -1,0 +1,6 @@
+#ignore credential files
+*.json
+*.pickle
+
+#ignore testing file
+secret_sales_testing.ipynb
