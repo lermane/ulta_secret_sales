@@ -3,23 +3,21 @@ from google_auth_oauthlib.flow import InstalledAppFlow,Flow
 from google.auth.transport.requests import Request
 import os
 import pickle
-import google_sheets_id
 
 #variables used in the following functions
-gsheetId = google_sheets_id.get_sheet_id()
 SAMPLE_RANGE_NAME = 'A1:AA20000'
 
 #copied the next 3 functions from
 #https://medium.com/analytics-vidhya/how-to-read-and-write-data-to-google-spreadsheet-using-python-ebf54d51a72c
 
-def Create_Service(client_secret_file, api_service_name, api_version, *scopes):
+def Create_Service(client_secret_file, token_write_file, api_service_name, api_version, *scopes):
     global service
     SCOPES = [scope for scope in scopes[0]]
     
     cred = None
 
-    if os.path.exists('token_write.pickle'):
-        with open('token_write.pickle', 'rb') as token:
+    if os.path.exists(token_write_file):
+        with open(token_write_file, 'rb') as token:
             cred = pickle.load(token)
 
     if not cred or not cred.valid:
@@ -29,18 +27,16 @@ def Create_Service(client_secret_file, api_service_name, api_version, *scopes):
             flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, SCOPES)
             cred = flow.run_local_server()
 
-        with open('token_write.pickle', 'wb') as token:
+        with open(token_write_file, 'wb') as token:
             pickle.dump(cred, token)
 
     try:
         service = build(api_service_name, api_version, credentials=cred)
         print(api_service_name, 'service created successfully')
-        #return service
     except Exception as e:
         print(e)
-        #return None
 
-def Clear_Sheet():
+def Clear_Sheet(gsheetId):
     result_clear = service.spreadsheets().values().clear(
         spreadsheetId=gsheetId,
         range=SAMPLE_RANGE_NAME,
@@ -48,7 +44,7 @@ def Clear_Sheet():
     ).execute()
     print('Sheet successfully cleared')
 
-def Export_Data_To_Sheets(df):
+def Export_Data_To_Sheets(gsheetId, df):
     response_date = service.spreadsheets().values().update(
         spreadsheetId=gsheetId,
         valueInputOption='RAW',
@@ -60,19 +56,19 @@ def Export_Data_To_Sheets(df):
     print('Sheet successfully updated')
 
 #updates the sale_filter view so it will change when the numbers of rows change
-def Update_Filter(i):
+def Update_Filter(gsheetId, filterId, rows, cols):
     my_range = {
     'sheetId': 0,
     'startRowIndex': 0,
     'startColumnIndex': 0,
-    'endRowIndex': i + 1,
-    'endColumnIndex': 11
+    'endRowIndex': rows + 1,
+    'endColumnIndex': cols
     }
     
     updateFilterViewRequest = {
         'updateFilterView': {
             'filter': {
-                'filterViewId': '2092242562',
+                'filterViewId': filterId,
                 'range': my_range
             },
             'fields': {

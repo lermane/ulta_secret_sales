@@ -14,7 +14,7 @@ def get_url_dict(session):
     all_url_info = {}
     #I'm pulling the list of urls straight from ulta's sidebar
     front_page = session.get('https://www.ulta.com/')
-    front_page_soup = BeautifulSoup(front_page.content)
+    front_page_soup = BeautifulSoup(front_page.content, features="lxml")
     #anchors = list of links in side bar
     anchors = front_page_soup.find_all('a', {'class' : 'Anchor'})
     for anchor in anchors:
@@ -24,7 +24,7 @@ def get_url_dict(session):
             if navigation[0] not in ['shop by brand', 'new arrivals', 'ulta beauty collection', 'gifts', 'sale & coupons', 'beauty tips']:
                 if navigation[1] != 'featured':
                     page = session.get(anchor.get('href'))
-                    soup = BeautifulSoup(page.content)
+                    soup = BeautifulSoup(page.content, features="lxml")
                     #get the number of total products from each id
                     num_results = int(re.findall(r'\b\d+\b', soup.find('h2', {'class' : 'search-res-title'}).find('span', {'class' : 'sr-only'}).text)[0])
                     #create a url for each 500 products
@@ -33,10 +33,10 @@ def get_url_dict(session):
                         url_info = {}
                         url_info['main_category'] = navigation[0]
                         url_info['sub_category'] = navigation[1]
-                        if len(directories) == 2:
+                        if len(navigation) == 2:
                             url_info['sub_sub_category'] = ' '
                         else:
-                            url_info['sub_sub_category'] = directories[2]
+                            url_info['sub_sub_category'] = navigation[2]
                         #the &No= tag is the number of products on that page starting from 0 and &Nrpp=500 means there will be at most 500 products on each page
                         url = anchor.get('href') + '&No=' + str(i * 500) + '&Nrpp=500'
                         all_url_info[url] = url_info
@@ -61,7 +61,7 @@ def scrape_url(url, session, products, all_url_info):
             products[product_name] = product
         except:
             print(url, product_containers.index(product_container))
-             print(exc, '\n')
+            print(exc, '\n')
     return(products)
  
 def get_single_product(soup, product_container, main_category, sub_category, sub_sub_category):
@@ -101,7 +101,7 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product['sub_sub_category'] = sub_sub_category
     return(product, product_name)
 
-def get_products_in_stock(drop_na_options, driver):
+def get_products_in_stock(drop_na_options, secret_sales, driver):
     products_in_stock = {}
     for product in drop_na_options:
         variants_in_stock = {}
@@ -130,7 +130,7 @@ def get_products_in_stock(drop_na_options, driver):
                 #if I don't add this sleep, the page doesn't finish loading. tried to use implicit waits but this just worked better.
                 time.sleep(1)
                 #creating a BeautifulSoup object to extract data
-                soup = BeautifulSoup(driver.page_source)
+                soup = BeautifulSoup(driver.page_source, features="lxml")
                 #getting price
                 price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
                 #only getting other information if it's a secret sale item
@@ -164,3 +164,4 @@ def get_products_in_stock(drop_na_options, driver):
         else:
             #if there aren't any product variants in stock, I don't want them in the document
             next
+    return(products_in_stock, secret_sales)
