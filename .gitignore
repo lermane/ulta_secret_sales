@@ -1,7 +1,7 @@
 #ignore credential files
 *.json
 *.pickle
-google_sheets_id.py
+google_sheets_credentials.py
 
 #ignore testing file
 secret_sales_testing.ipynb
