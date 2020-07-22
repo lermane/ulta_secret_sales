@@ -75,7 +75,10 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product_name = product['brand'] + ' ' + product['desc']
     #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
     if product_container.find('label', {'class' : 'sr-only'}) is not None:
-        product['rating'] = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
+        rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
+        if rating == 'Price':
+            rating = 0
+        product['rating'] = rating
     if product_container.find('span', {'class' : 'prodCellReview'}) is not None:
         product['number_of_reviews'] = re.findall(r'\b\d+\b', product_container.find('span', {'class' : 'prodCellReview'}).text)[0]
     #the prices are labeled differently in the code depending on whether the product is for sale or not (for sale as in marked as sale not a secret sale)
