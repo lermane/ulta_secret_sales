@@ -25,6 +25,29 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             products = data
 
 #cleaning the data
+#df of every product on ulta's website
+ulta_df = pd.DataFrame.from_dict(products).transpose()
+#df of only the secret sales
+secret_sales_df = copy.deepcopy(ulta_df.query('secret_sale == 1 & sale == 0'))
+#I'm dropping the columns that have NA in in the options column so I know which products have multiple options so I can 
+#check which of those options are in stock
+drop_na_options = pd.DataFrame.to_dict(secret_sales_df.dropna(subset=['options']).transpose())
+#a couple of the items had an incorrect url for some reason so I turned secret_sales back into a dictionary so that,
+#when I need to update a product's url, it's easier for me to do so. you could probably do this using the dataframe 
+#instead but I didn't feel like it
+secret_sales = pd.DataFrame.to_dict(secret_sales_df.transpose())
+
+#starting a headless selenium driver
+chrome_options = Options()  
+chrome_options.add_argument("--headless")  
+driver = webdriver.Chrome(r'C:\Users\elerm\Downloads\chromedriver_win32\chromedriver.exe', chrome_options = chrome_options)
+products_in_stock = {}
+
+products_in_stock = get_products_in_stock(drop_na_options, driver)
+
+driver.close()
+driver.quit()
+
 ulta_df = pd.DataFrame.from_dict(products).transpose()
 secret_sales = ulta_df.query('secret_sale == 1 & sale == 0')
 df = secret_sales.fillna(' ').reset_index().rename(columns={'index' : 'name', 'desc' : 'product'})

@@ -6,8 +6,13 @@ import re
 from bs4 import BeautifulSoup
 import time
 import math
-from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow,Flow
+from google.auth.transport.requests import Request
+import os
+import pickle
+import google_sheets_id
 
 #using the ids to create real urls
 def get_url_dict(session):
@@ -101,66 +106,82 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product['sub_sub_category'] = sub_sub_category
     return(product, product_name)
 
-def get_products_in_stock(drop_na_options, driver):
-    products_in_stock = {}
-    for product in drop_na_options:
-        variants_in_stock = {}
-        temp = {}
-        #opening product url in the driver/browser
-        driver.get(drop_na_options[product]['url'])
-        #making sure that the url is correct! it wasn't for a couple of the products for some reason idk why. but I'm 
-        #fixing it in this step.
-        if driver.current_url.split('productId=')[1] != drop_na_options[product]['id']:
-            driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
-            driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(drop_na_options[product]['id'])
-            driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
-            secret_sales[product]['url'] = driver.current_url
-        #if I don't add this sleep, the page doesn't finish loading. tried to use implicit waits but this just worked better.
-        time.sleep(1)
-        #getting all the product variants from the page
-        product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
-        for product_variant in product_variants:
-            try:
-                #clicking on each variant at a time to get their price and availability
-                product_variant.click()
-            except:
-                #if I can't click on it I want to go to the next variant
-                next
-            else:
-                #if I don't add this sleep, the page doesn't finish loading. tried to use implicit waits but this just worked better.
-                time.sleep(1)
-                #creating a BeautifulSoup object to extract data
-                soup = BeautifulSoup(driver.page_source)
-                #getting price
-                price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
-                #only getting other information if it's a secret sale item
-                if price.endswith('.97'):
-                    #color and size are in different locations
-                    #getting color
-                    option = soup.find('meta', {'property' : 'product:color'}).get('content')
-                    #if there's no color, checking if there's a size
-                    if option == '':
-                        option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
-                        if option_tag is not None:
-                            option = option_tag.text
-                    #if there's no color or size I'm putting 'NA' to represent that there's still a swatch there even if we can't find
-                    #information about it. like 99.99% of the time this shouldn't happen but just in case.
-                    if option == '':
-                        option = 'NA'
-                    #only adding the product variant if it's available
-                    if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
-                        temp[option] = price
-        #checking if the temp dictionary is empty to make sure if there are indeed product variants in stock
-        if bool(temp):
-            #rearranging the dictionary to group variants with the same size together and putting the different options in a single string
-            #so that, in the end, for each product, there is a dictionary including the different price options and, for each price option, 
-            #a string containing the options (colors, sizes) available for that price point. 
-            for key, value in temp.items():
-                variants_in_stock.setdefault(value, set()).add(key)
-            for key, value in variants_in_stock.items():
-                new_value = ", ".join(value)
-                variants_in_stock[key] = new_value
-            products_in_stock[driver.title[:-14]] = variants_in_stock
+#variables used in the following functions
+gsheetId = google_sheets_id.get_sheet_id()
+SAMPLE_RANGE_NAME = 'A1:AA20000'
+
+#copied the next 3 functions from
+#https://medium.com/analytics-vidhya/how-to-read-and-write-data-to-google-spreadsheet-using-python-ebf54d51a72c
+
+def Create_Service(client_secret_file, api_service_name, api_version, *scopes):
+    global service
+    SCOPES = [scope for scope in scopes[0]]
+    
+    cred = None
+
+    if os.path.exists('token_write.pickle'):
+        with open('token_write.pickle', 'rb') as token:
+            cred = pickle.load(token)
+
+    if not cred or not cred.valid:
+        if cred and cred.expired and cred.refresh_token:
+            cred.refresh(Request())
         else:
-            #if there aren't any product variants in stock, I don't want them in the document
-            next
+            flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, SCOPES)
+            cred = flow.run_local_server()
+
+        with open('token_write.pickle', 'wb') as token:
+            pickle.dump(cred, token)
+
+    try:
+        service = build(api_service_name, api_version, credentials=cred)
+        print(api_service_name, 'service created successfully')
+        #return service
+    except Exception as e:
+        print(e)
+        #return None
+
+def Clear_Sheet():
+    result_clear = service.spreadsheets().values().clear(
+        spreadsheetId=gsheetId,
+        range=SAMPLE_RANGE_NAME,
+        body = {}
+    ).execute()
+    print('Sheet successfully cleared')
+
+def Export_Data_To_Sheets(df):
+    response_date = service.spreadsheets().values().update(
+        spreadsheetId=gsheetId,
+        valueInputOption='RAW',
+        range=SAMPLE_RANGE_NAME,
+        body=dict(
+            majorDimension='ROWS',
+            values=df.T.reset_index().T.values.tolist())
+    ).execute()
+    print('Sheet successfully updated')
+
+#updates the sale_filter view so it will change when the numbers of rows change
+def Update_Filter(i):
+    my_range = {
+    'sheetId': 0,
+    'startRowIndex': 0,
+    'startColumnIndex': 0,
+    'endRowIndex': i + 1,
+    'endColumnIndex': 11
+    }
+    
+    updateFilterViewRequest = {
+        'updateFilterView': {
+            'filter': {
+                'filterViewId': '2092242562',
+                'range': my_range
+            },
+            'fields': {
+                'paths': 'range'
+            }
+        }
+    }
+    
+    body = {'requests': [updateFilterViewRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Filter successfully updated')
