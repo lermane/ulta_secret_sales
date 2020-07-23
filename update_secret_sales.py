@@ -86,7 +86,7 @@ gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_local'), df)
 gapi.Update_Filter(creds.get_sheet_id('main_local'), creds.get_filter_id('main_local'), len(df), len(df.columns))
 
 #saving it as a .csv for funsies/ just in case idk
-secret_sales_in_stock.to_csv('secret_sales_in_stock.csv')
-ulta_df.to_csv('ulta_df.csv')
+secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
+ulta_df.to_csv('data/ulta_df.csv')
 
 print('DONE')
