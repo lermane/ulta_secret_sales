@@ -104,24 +104,33 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product['sub_sub_category'] = sub_sub_category
     return(product, product_name)
 
-def get_products_in_stock(drop_na_options, secret_sales, driver):
+def get_products_in_stock(secret_sales, driver):
     products_in_stock = {}
-    for product in drop_na_options:
+    for product in secret_sales:
         variants_in_stock = {}
         temp = {}
         #opening product url in the driver/browser
-        driver.get(drop_na_options[product]['url'])
+        driver.get(secret_sales[product]['url'])
+        #if the product doesn't exist anymore ulta wil take you to this site
+        if driver.current_url == 'https://www.ulta.com/404.jsp':
+            next
         #making sure that the url is correct! it wasn't for a couple of the products for some reason idk why. but I'm 
         #fixing it in this step.
-        if driver.current_url.split('productId=')[1] != drop_na_options[product]['id']:
+        elif driver.current_url.split('productId=')[1] != secret_sales[product]['id']:
             driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
-            driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(drop_na_options[product]['id'])
+            driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(secret_sales[product]['id'])
             driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
-            secret_sales[product]['url'] = driver.current_url
+            if driver.current_url == 'https://www.ulta.com/404.jsp':
+                next
+            elif driver.current_url.split('productId=')[1] == secret_sales[product]['id']:
+                secret_sales[product]['url'] = driver.current_url
         #if I don't add this sleep, the page doesn't finish loading. tried to use implicit waits but this just worked better.
         time.sleep(1)
         #getting all the product variants from the page
         product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
+        if len(product_variants) == 0:
+            #products that only have one color or one size or whatever have their product variant information in a different lcoation
+            product_variants = driver.find_elements_by_class_name('ProductDetail__productSwatches')
         for product_variant in product_variants:
             try:
                 #clicking on each variant at a time to get their price and availability
@@ -163,6 +172,7 @@ def get_products_in_stock(drop_na_options, secret_sales, driver):
             for key, value in variants_in_stock.items():
                 new_value = ", ".join(value)
                 variants_in_stock[key] = new_value
+            #driver.title[:-14] is the product name
             products_in_stock[driver.title[:-14]] = variants_in_stock
         else:
             #if there aren't any product variants in stock, I don't want them in the document
