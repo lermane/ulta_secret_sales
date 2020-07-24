@@ -1,6 +1,7 @@
 import pandas as pd
 import requests
 import copy
+import json
 import concurrent.futures
 import ulta_functions as ulta
 import google_api_functions as gapi
@@ -12,7 +13,11 @@ session = requests.Session()
 all_url_info = {}
 products = {}
 
-all_url_info = ulta.get_url_dict(session)
+#I saved it to a file so I wouldn't have to waste time making requests to get the same data
+f = open("data/all_url_info_dict.json","r")
+all_url_info = json.loads(f.read())
+f.close()
+
 urls = list(all_url_info.keys())
 
 #I'm using threading to make the code run faster
