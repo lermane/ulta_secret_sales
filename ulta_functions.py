@@ -89,7 +89,7 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
         product['sale'] = 1
         product['price'] = product_container.find('span', {'class' : 'pro-old-price'}).text.strip()
         product['sale_price'] = product_container.find('span', {'class' : 'pro-new-price'}).text.strip()
-    #marking it as secret sale if the price has .97
+    #marking it as secret sale if the price does not end in 0 or 9 (trying to catch more potential secret sales)
     if '.97' in product['price']:
         product['secret_sale'] = 1
     else:
@@ -145,18 +145,18 @@ def get_products_in_stock(secret_sales, driver):
                 soup = BeautifulSoup(driver.page_source, features="lxml")
                 #getting price
                 price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
-                #only getting other information if it's a secret sale item
-                if price.endswith('.97'):
-                    #color and size are in different locations
-                    #getting color
+                #attempting to catch other secret sale items that don't end with .97
+                if price.endswith('0') == False and price.endswith('9') == False:
+                    #the option is sometimes in different locations
                     option = soup.find('meta', {'property' : 'product:color'}).get('content')
-                    #if there's no color, checking if there's a size
-                    if option == '':
+                    #checking other possible locations of option
+                    if option == '' and soup.find('div', {'class' : 'ProductDetail__colorPanel'}) is not None:
                         option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
                         if option_tag is not None:
                             option = option_tag.text
-                    #if there's no color or size I'm putting 'NA' to represent that there's still a swatch there even if we can't find
-                    #information about it. like 99.99% of the time this shouldn't happen but just in case.
+                    if option == '' and soup.find('span', {'class' : 'ProductVariantSelector__description'}) is not None:
+                        option = soup.find('span', {'class' : 'ProductVariantSelector__description'}).text
+                    #putting the option as 'NA' if I can't find its label
                     if option == '':
                         option = 'NA'
                     #only adding the product variant if it's available
@@ -172,8 +172,7 @@ def get_products_in_stock(secret_sales, driver):
             for key, value in variants_in_stock.items():
                 new_value = ", ".join(value)
                 variants_in_stock[key] = new_value
-            #driver.title[:-14] is the product name
-            products_in_stock[driver.title[:-14]] = variants_in_stock
+            products_in_stock[secret_sales[product]['id']] = variants_in_stock
         else:
             #if there aren't any product variants in stock, I don't want them in the document
             next
