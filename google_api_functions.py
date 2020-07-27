@@ -81,27 +81,27 @@ def Update_Filter(gsheetId, filterId, rows, cols):
     service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('Filter successfully updated')
 
-    #add hyperlinks 
+#add hyperlinks 
 def Add_Hyperlink(hyperlink, hypertext, sheetId, rowIndex, colIndex):
-request = {
-    "updateCells": {
-        "rows": [
-            {
-                "values": [{
-                    "userEnteredValue": {
-                        "formulaValue": "=HYPERLINK({link}, {text})".format(link = hyperlink, text = hypertext)
-                    }
-                }]
+    request = {
+        "updateCells": {
+            "rows": [
+                {
+                    "values": [{
+                        "userEnteredValue": {
+                            "formulaValue": "=HYPERLINK({link}, {text})".format(link = hyperlink, text = hypertext)
+                        }
+                    }]
+                }
+            ],
+            "fields": "userEnteredValue",
+            "start": {
+                "sheetId": 0,
+                "rowIndex": rowIndex,
+                "columnIndex": colIndex
             }
-        ],
-        "fields": "userEnteredValue",
-        "start": {
-            "sheetId": 0,
-            "rowIndex": rowIndex,
-            "columnIndex": colIndex
         }
     }
-}
-body = {"requests": [request]}
-service.spreadsheets().batchUpdate(spreadsheetId=sheetId, body=body).execute()
+    body = {"requests": [request]}
+    service.spreadsheets().batchUpdate(spreadsheetId=sheetId, body=body).execute()
     print('Hyperlinks successfully added')

@@ -125,6 +125,7 @@ def get_products_in_stock(secret_sales, driver):
             elif driver.current_url.split('productId=')[1] == secret_sales[product]['id']:
                 secret_sales[product]['url'] = driver.current_url
         #if I don't add this sleep, the page doesn't finish loading. tried to use implicit waits but this just worked better.
+        
         time.sleep(1)
         #getting all the product variants from the page
         product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
@@ -143,25 +144,7 @@ def get_products_in_stock(secret_sales, driver):
                 time.sleep(1)
                 #creating a BeautifulSoup object to extract data
                 soup = BeautifulSoup(driver.page_source, features="lxml")
-                #getting price
-                price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
-                #attempting to catch other secret sale items that don't end with .97
-                if price.endswith('0') == False and price.endswith('9') == False:
-                    #the option is sometimes in different locations
-                    option = soup.find('meta', {'property' : 'product:color'}).get('content')
-                    #checking other possible locations of option
-                    if option == '' and soup.find('div', {'class' : 'ProductDetail__colorPanel'}) is not None:
-                        option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
-                        if option_tag is not None:
-                            option = option_tag.text
-                    if option == '' and soup.find('span', {'class' : 'ProductVariantSelector__description'}) is not None:
-                        option = soup.find('span', {'class' : 'ProductVariantSelector__description'}).text
-                    #putting the option as 'NA' if I can't find its label
-                    if option == '':
-                        option = 'NA'
-                    #only adding the product variant if it's available
-                    if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
-                        temp[option] = price
+                temp = get_variants_in_stock(product, soup, secret_sales, temp)
         #checking if the temp dictionary is empty to make sure if there are indeed product variants in stock
         if bool(temp):
             #rearranging the dictionary to group variants with the same size together and putting the different options in a single string
@@ -177,3 +160,28 @@ def get_products_in_stock(secret_sales, driver):
             #if there aren't any product variants in stock, I don't want them in the document
             next
     return(products_in_stock, secret_sales)
+
+def get_variants_in_stock(product, soup, secret_sales, temp):
+    #there are products that only a couple of shades are labeled as sale so I'm removing those to make sure no sale items slip through
+    if soup.find('img', {'src' : 'https://images.ulta.com/is/image/Ulta/badge-sale?fmt=png-alpha'}) is not None:
+        next
+    #getting price
+    price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
+    #attempting to catch other secret sale items that don't end with .97
+    if ('.97' in price) or ('-' not in str(secret_sales[product]['price'])) or ('-' in str(secret_sales[product]['price']) and str(secret_sales[product]['price']).split(' - ')[1][1:] != price):
+        #the option is sometimes in different locations
+        option = soup.find('meta', {'property' : 'product:color'}).get('content')
+        #checking other possible locations of option
+        if option == '' and soup.find('div', {'class' : 'ProductDetail__colorPanel'}) is not None:
+            option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
+            if option_tag is not None:
+                option = option_tag.text
+        if option == '' and soup.find('span', {'class' : 'ProductVariantSelector__description'}) is not None:
+            option = soup.find('span', {'class' : 'ProductVariantSelector__description'}).text
+        #putting the option as 'NA' if I can't find its label
+        if option == '':
+            option = 'NA'
+        #only adding the product variant if it's available
+        if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
+            temp[option] = price
+    return(temp)
