@@ -94,7 +94,9 @@ secret_sales_df = pd.concat([secret_sales_df, not_in_secret_sales_df])
 secret_sales = pd.DataFrame.to_dict(secret_sales_df.reset_index().rename(columns={'index' : 'id'}).set_index('name').transpose())
 
 #finding out which products are in stock
-driver = webdriver.Chrome(r'C:\Users\elerm\Downloads\chromedriver_win32\chromedriver.exe')
+chrome_options = Options()
+chrome_options.add_argument("--headless")
+driver = webdriver.Chrome(r'C:\Users\elerm\Downloads\chromedriver_win32\chromedriver.exe', options = chrome_options)
 products_in_stock, secret_sales = ulta.get_products_in_stock(secret_sales, driver)
 driver.close()
 driver.quit()
