@@ -82,26 +82,33 @@ def Update_Filter(gsheetId, filterId, rows, cols):
     print('Filter successfully updated')
 
 #add hyperlinks 
-def Add_Hyperlink(hyperlink, hypertext, sheetId, rowIndex, colIndex):
-    request = {
-        "updateCells": {
-            "rows": [
-                {
-                    "values": [{
-                        "userEnteredValue": {
-                            "formulaValue": "=HYPERLINK({link}, {text})".format(link = hyperlink, text = hypertext)
-                        }
-                    }]
+def Add_Hyperlinks(sheetId, df, hyperlink_urls):
+    requests = []
+    
+    for i in range(len(df)):
+        hyperlink = '"' + hyperlink_urls[i] + '"'
+        hypertext = '"' + df.iloc[i]['name'] + '"'
+        request = {
+            "updateCells": {
+                "rows": [
+                    {
+                        "values": [{
+                            "userEnteredValue": {
+                                "formulaValue": "=HYPERLINK({link}, {text})".format(link = hyperlink, text = hypertext)
+                            }
+                        }]
+                    }
+                ],
+                "fields": "userEnteredValue",
+                "start": {
+                    "sheetId": 0,
+                    "rowIndex": i + 1,
+                    "columnIndex": 3
                 }
-            ],
-            "fields": "userEnteredValue",
-            "start": {
-                "sheetId": 0,
-                "rowIndex": rowIndex,
-                "columnIndex": colIndex
             }
         }
-    }
-    body = {"requests": [request]}
+        requests.append(request)
+        
+    body = {"requests": requests}
     service.spreadsheets().batchUpdate(spreadsheetId=sheetId, body=body).execute()
     print('Hyperlinks successfully added')

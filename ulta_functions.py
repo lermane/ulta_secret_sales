@@ -117,6 +117,7 @@ def get_products_in_stock(secret_sales, driver):
         #making sure that the url is correct! it wasn't for a couple of the products for some reason idk why. but I'm 
         #fixing it in this step.
         elif driver.current_url.split('productId=')[1] != secret_sales[product]['id']:
+            time.sleep(1)
             driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
             driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(secret_sales[product]['id'])
             driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
@@ -144,7 +145,40 @@ def get_products_in_stock(secret_sales, driver):
                 time.sleep(1)
                 #creating a BeautifulSoup object to extract data
                 soup = BeautifulSoup(driver.page_source, features="lxml")
-                temp = get_variants_in_stock(product, soup, secret_sales, temp)
+                #there are products that only a couple of shades are labeled as sale so I'm removing those to make sure no sale items slip through
+                if soup.find('img', {'src' : 'https://images.ulta.com/is/image/Ulta/badge-sale?fmt=png-alpha'}) is not None:
+                    next
+                #getting price
+                price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
+                keep = False
+                #attempting to catch other secret sale items that don't end with .97
+                if '.97' in price:
+                    keep = True
+                elif '-' not in secret_sales[product]['price']:
+                    if float(price) <= float(secret_sales[product]['price'][1:]):
+                        keep = True
+                elif '-' in secret_sales[product]['price']:
+                    if price == secret_sales[product]['price'].split(' - ')[1][1:] and '0' != price[-1]:
+                        keep = True
+                    elif price == secret_sales[product]['price'].split(' - ')[0][1:]:
+                        keep = True
+                    elif price != secret_sales[product]['price'].split(' - ')[0][1:] and float(price) < float(secret_sales[product]['price'].split(' - ')[1][1:]) and '0' != price[-1]:
+                        keep = True
+                if keep == True:
+                    option = soup.find('meta', {'property' : 'product:color'}).get('content')
+                    #checking other possible locations of option
+                    if option == '' and soup.find('div', {'class' : 'ProductDetail__colorPanel'}) is not None:
+                        option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
+                        if option_tag is not None:
+                            option = option_tag.text
+                    if option == '' and soup.find('span', {'class' : 'ProductVariantSelector__description'}) is not None:
+                        option = soup.find('span', {'class' : 'ProductVariantSelector__description'}).text
+                    #putting the option as 'NA' if I can't find its label
+                    if option == '':
+                        option = 'NA'
+                    #only adding the product variant if it's available
+                    if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
+                        temp[option] = price
         #checking if the temp dictionary is empty to make sure if there are indeed product variants in stock
         if bool(temp):
             #rearranging the dictionary to group variants with the same size together and putting the different options in a single string
@@ -160,28 +194,3 @@ def get_products_in_stock(secret_sales, driver):
             #if there aren't any product variants in stock, I don't want them in the document
             next
     return(products_in_stock, secret_sales)
-
-def get_variants_in_stock(product, soup, secret_sales, temp):
-    #there are products that only a couple of shades are labeled as sale so I'm removing those to make sure no sale items slip through
-    if soup.find('img', {'src' : 'https://images.ulta.com/is/image/Ulta/badge-sale?fmt=png-alpha'}) is not None:
-        next
-    #getting price
-    price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
-    #attempting to catch other secret sale items that don't end with .97
-    if ('.97' in price) or ('-' not in str(secret_sales[product]['price'])) or ('-' in str(secret_sales[product]['price']) and str(secret_sales[product]['price']).split(' - ')[1][1:] != price):
-        #the option is sometimes in different locations
-        option = soup.find('meta', {'property' : 'product:color'}).get('content')
-        #checking other possible locations of option
-        if option == '' and soup.find('div', {'class' : 'ProductDetail__colorPanel'}) is not None:
-            option_tag = soup.find('div', {'class' : 'ProductDetail__colorPanel'}).find_all('span')[1]
-            if option_tag is not None:
-                option = option_tag.text
-        if option == '' and soup.find('span', {'class' : 'ProductVariantSelector__description'}) is not None:
-            option = soup.find('span', {'class' : 'ProductVariantSelector__description'}).text
-        #putting the option as 'NA' if I can't find its label
-        if option == '':
-            option = 'NA'
-        #only adding the product variant if it's available
-        if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
-            temp[option] = price
-    return(temp)
