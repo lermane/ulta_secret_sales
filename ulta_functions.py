@@ -189,7 +189,7 @@ def get_products_in_stock(secret_sales, driver):
             next
         #making sure that the url is correct
         elif driver.current_url.split('productId=')[1] != product_id:
-            time.sleep(1)
+            time.sleep(5)
             driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
             driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(product_id)
             driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
@@ -345,3 +345,25 @@ def add_precent_off(secret_sales_in_stock):
         percent_off.append(round(percent, 4))
     secret_sales_in_stock['percent_off'] = percent_off
     return(secret_sales_in_stock)
+
+#I noticed a couple of times products that were only reduced in price by a couple of cents were in the document and I don't want that to happen
+def remove_bad_deals(secret_sales_in_stock):
+    secret_sales_in_stock.reset_index() #if there are multiple prices for a product, I don't want every entry to be removed, just the one that vialates the if/else statement below
+    df = copy.deepcopy(secret_sales_in_stock)
+    for i in range(len(secret_sales_in_stock)):
+        if '-' in secret_sales_in_stock.iloc[i]['old_price'] or secret_sales_in_stock.iloc[i]['old_price'] == ' ':
+            next
+        else:
+            current_price = float(secret_sales_in_stock.iloc[i]['price']) #should be a float already but i'm paranoid
+            old_price = float(secret_sales_in_stock.iloc[i]['old_price'][1:])
+            if (current_price / old_price > .95) and ('.97' not in str(current_price)) and ('.97' not in str(old_price)):
+                df = df.drop([secret_sales_in_stock.iloc[i].name])
+    secret_sales_in_stock = (
+        df
+        .pipe(copy.deepcopy)
+        .set_index('id')
+        )
+    return(secret_sales_in_stock)
+                
+            
+            

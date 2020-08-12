@@ -114,7 +114,7 @@ def Add_Percent_Format(gsheetId, rows):
     'sheetId': 0,
     'startRowIndex': 1,
     'startColumnIndex': 8,
-    'endRowIndex': len(df) + 1,
+    'endRowIndex': rows + 1,
     'endColumnIndex': 9
     }
     
@@ -136,15 +136,7 @@ def Add_Percent_Format(gsheetId, rows):
     service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('percent_off number format successfully changed')
 
-def Add_Conditional_Format(gsheetId):
-my_range = {
-    'sheetId': 0,
-    'startRowIndex': 0,
-    'startColumnIndex': 0,
-    'endRowIndex': 160,
-    'endColumnIndex': 14
-    }
-
+#add the condition where, if the age column value is "new", color it orange. I only have to do this once ever.
 def Add_Conditional_Format(gsheetId, sheet_name):
     my_range = {
         'sheetId': 0,

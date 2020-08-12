@@ -125,6 +125,7 @@ secret_sales_in_stock = (
     .drop(columns={'old_secret_sales_old_price', 'old_ulta_df_price', 'ulta_df_price', 'options', 'sale', 'secret_sale', 'sale_price'})
     .rename(columns={'price2' : 'price', 'options2' : 'options'})
     .pipe(ulta.convert_price_to_float)
+    .pipe(ulta.remove_bad_deals)
     .pipe(ulta.add_precent_off)
     .query('percent_off != -1')
 )
@@ -144,6 +145,7 @@ gapi.Clear_Sheet(creds.get_sheet_id('main_mod'))
 gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_mod'), df)
 gapi.Update_Filter(creds.get_sheet_id('main_mod'), creds.get_filter_id('main_mod'), len(df), len(df.columns))
 gapi.Add_Hyperlinks(creds.get_sheet_id('main_mod'), df, hyperlink_urls)
+gapi.Add_Percent_Format(creds.get_sheet_id('main_mod'), len(df))
 
 #update the sheet hosted on my google drive
 gapi.Create_Service(creds.get_credentials_file('main_local'), creds.get_token_write_file('main_local'), 'sheets', 'v4', ['https://www.googleapis.com/auth/spreadsheets'])
@@ -151,6 +153,7 @@ gapi.Clear_Sheet(creds.get_sheet_id('main_local'))
 gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_local'), df)
 gapi.Update_Filter(creds.get_sheet_id('main_local'), creds.get_filter_id('main_local'), len(df), len(df.columns))
 gapi.Add_Hyperlinks(creds.get_sheet_id('main_local'), df, hyperlink_urls)
+gapi.Add_Percent_Format(creds.get_sheet_id('main_local'), len(df))
 
 secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
 ulta_df.to_csv('data/ulta_df.csv')
