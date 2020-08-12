@@ -76,19 +76,16 @@ def Update_Filter(gsheetId, filterId, rows, cols):
             }
         }
     }
-    
     body = {'requests': [updateFilterViewRequest]}
     service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('Filter successfully updated')
 
 #add hyperlinks 
-def Add_Hyperlinks(sheetId, df, hyperlink_urls):
-    requests = []
-    
+def Add_Hyperlinks(gsheetId, df, hyperlink_urls):
     for i in range(len(df)):
         hyperlink = '"' + hyperlink_urls[i] + '"'
         hypertext = '"' + df.iloc[i]['name'] + '"'
-        request = {
+        addHyperlinksRequest = {
             "updateCells": {
                 "rows": [
                     {
@@ -107,8 +104,81 @@ def Add_Hyperlinks(sheetId, df, hyperlink_urls):
                 }
             }
         }
-        requests.append(request)
-        
-    body = {"requests": requests}
-    service.spreadsheets().batchUpdate(spreadsheetId=sheetId, body=body).execute()
+    body = {'requests': [addHyperlinksRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('Hyperlinks successfully added')
+
+#change percent_off number format in the google docs to a percent
+def Add_Percent_Format(gsheetId, rows):
+    my_range = {
+    'sheetId': 0,
+    'startRowIndex': 1,
+    'startColumnIndex': 8,
+    'endRowIndex': len(df) + 1,
+    'endColumnIndex': 9
+    }
+    
+    addPercentFormatRequest = {
+      "repeatCell": {
+        "range": my_range,
+        "cell": {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "NUMBER",
+              "pattern": "00.00%"
+            }
+          }
+        },
+        "fields": "userEnteredFormat.numberFormat"
+      }
+    }
+    body = {'requests': [addPercentFormatRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('percent_off number format successfully changed')
+
+def Add_Conditional_Format(gsheetId):
+my_range = {
+    'sheetId': 0,
+    'startRowIndex': 0,
+    'startColumnIndex': 0,
+    'endRowIndex': 160,
+    'endColumnIndex': 14
+    }
+
+def Add_Conditional_Format(gsheetId, sheet_name):
+    my_range = {
+        'sheetId': 0,
+        'startRowIndex': 0,
+        'startColumnIndex': 0,
+        'endRowIndex': 160,
+        'endColumnIndex': 14
+        }
+
+    addConditionalFormatRequest = {
+          "addConditionalFormatRule": {
+            "rule": {
+              "ranges" : [my_range],
+              "booleanRule": {
+                "condition": {
+                  "type": "CUSTOM_FORMULA",
+                  "values": [
+                    {
+                      "userEnteredValue": '={sheet}!$N1="new"'.format(sheet = sheet_name)
+                    }
+                  ]
+                },
+                "format": {
+                  "backgroundColor": {
+                    "red" : 0.9764705882352941,
+                    "green" : 0.796078431372549,
+                    "blue" : 0.611764705882353
+                  }
+                }
+              }
+            },
+            "index": 0
+          }
+        }
+    body = {'requests': [addConditionalFormatRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('percent_off number format successfully changed')
