@@ -314,7 +314,7 @@ def add_old_price(secret_sales_in_stock):
     secret_sales_in_stock['old_price'] = old_price
     return(secret_sales_in_stock)
 
-def add_age(secret_sales_in_stock):
+def add_age(secret_sales_in_stock, old_secret_sales_in_stock):
     age = []
     for i in range(len(secret_sales_in_stock)):
         if secret_sales_in_stock.iloc[i].name in set(old_secret_sales_in_stock.index):
