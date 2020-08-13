@@ -91,7 +91,7 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product['brand'] = product_container.find('h4', {'class' : 'prod-title'}).text.strip()
     #description is the name of the product. so if there's a product called "ULTA Fabulous Concealer", "ULTA" would be the brand and "Fabulous Concealer" would be the description.
     product['product'] = product_container.find('p', {'class' : 'prod-desc'}).text.strip()
-    product['name'] = product['brand'] + product['product']
+    product['name'] = product['brand'] + ' ' + product['product']
     #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
     if product_container.find('label', {'class' : 'sr-only'}) is not None:
         rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
@@ -348,7 +348,7 @@ def add_precent_off(secret_sales_in_stock):
 
 #I noticed a couple of times products that were only reduced in price by a couple of cents were in the document and I don't want that to happen
 def remove_bad_deals(secret_sales_in_stock):
-    secret_sales_in_stock.reset_index() #if there are multiple prices for a product, I don't want every entry to be removed, just the one that vialates the if/else statement below
+    secret_sales_in_stock = secret_sales_in_stock.reset_index() #if there are multiple prices for a product, I don't want every entry to be removed, just the one that vialates the if/else statement below
     df = copy.deepcopy(secret_sales_in_stock)
     for i in range(len(secret_sales_in_stock)):
         if '-' in secret_sales_in_stock.iloc[i]['old_price'] or secret_sales_in_stock.iloc[i]['old_price'] == ' ':
@@ -356,7 +356,7 @@ def remove_bad_deals(secret_sales_in_stock):
         else:
             current_price = float(secret_sales_in_stock.iloc[i]['price']) #should be a float already but i'm paranoid
             old_price = float(secret_sales_in_stock.iloc[i]['old_price'][1:])
-            if (current_price / old_price > .95) and ('.97' not in str(current_price)) and ('.97' not in str(old_price)):
+            if (current_price / old_price > .9) and ('.97' not in str(current_price)) and ('.97' not in str(old_price)):
                 df = df.drop([secret_sales_in_stock.iloc[i].name])
     secret_sales_in_stock = (
         df

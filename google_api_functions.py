@@ -82,10 +82,11 @@ def Update_Filter(gsheetId, filterId, rows, cols):
 
 #add hyperlinks 
 def Add_Hyperlinks(gsheetId, df, hyperlink_urls):
+    addHyperlinksRequest = []
     for i in range(len(df)):
         hyperlink = '"' + hyperlink_urls[i] + '"'
         hypertext = '"' + df.iloc[i]['name'] + '"'
-        addHyperlinksRequest = {
+        request = {
             "updateCells": {
                 "rows": [
                     {
@@ -104,7 +105,8 @@ def Add_Hyperlinks(gsheetId, df, hyperlink_urls):
                 }
             }
         }
-    body = {'requests': [addHyperlinksRequest]}
+        addHyperlinksRequest.append(request)
+    body = {'requests': addHyperlinksRequest}
     service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('Hyperlinks successfully added')
 
