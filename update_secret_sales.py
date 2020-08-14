@@ -29,6 +29,13 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             
 session.close()
 
+#creating a df from the data
+ulta_df = (
+    pd.DataFrame.from_dict(products)
+    .transpose()
+    .rename_axis('id')
+)
+
 #loading in old data from yesterday
 old_ulta_df = (
     pd.read_csv('data/ulta_df.csv')
