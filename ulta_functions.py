@@ -91,7 +91,6 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product['brand'] = product_container.find('h4', {'class' : 'prod-title'}).text.strip()
     #description is the name of the product. so if there's a product called "ULTA Fabulous Concealer", "ULTA" would be the brand and "Fabulous Concealer" would be the description.
     product['product'] = product_container.find('p', {'class' : 'prod-desc'}).text.strip()
-    product['name'] = product['brand'] + ' ' + product['product']
     #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
     if product_container.find('label', {'class' : 'sr-only'}) is not None:
         rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
@@ -108,11 +107,6 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
         product['sale'] = 1
         product['price'] = product_container.find('span', {'class' : 'pro-old-price'}).text.strip()
         product['sale_price'] = product_container.find('span', {'class' : 'pro-new-price'}).text.strip()
-    #marking it as secret sale if the price does not end in 0 or 9 (trying to catch more potential secret sales)
-    if '.97' in product['price']:
-        product['secret_sale'] = 1
-    else:
-        product['secret_sale'] = 0
     #getting the available offers and number of options/colors of the product if they're listed
     if product_container.find('div', {'class' : 'product-detail-offers'}) is not None:
         product['offers'] = product_container.find('div', {'class' : 'product-detail-offers'}).text.strip()
@@ -161,20 +155,20 @@ def clean_changed_prices_df(changed_prices_df):
     changed_prices_df = (
         df
         .pipe(copy.deepcopy)
-        .drop(columns={'old_price', 'old_sale', 'old_secret_sale', 'old_options'})
+        .drop(columns={'old_price', 'old_sale', 'old_options'})
     )
     return(changed_prices_df)
 
 def get_secret_sales_not_in_df(secret_sales_df, old_secret_sales_in_stock, ulta_df):
-    query = "id not in {}".format(secret_sales_df.index.tolist())
+    query = "product_id not in {}".format(secret_sales_df.index.tolist())
     #make list of the products that are in the old ulta secret sales doc but aren't in the current secret sales dictionary
     not_in_secret_sales = old_secret_sales_in_stock.query(query).index.tolist()
 
-    ulta_df_t = ulta_df.reset_index().rename(columns={'index' : 'id'})
+    ulta_df_t = ulta_df.reset_index().rename(columns={'index' : 'product_id'})
     #make df containing the products from the not_in_secret_sales list
     not_in_secret_sales_df = (
-        ulta_df_t[ulta_df_t['id'].isin(not_in_secret_sales)]
-        .set_index('id')
+        ulta_df_t[ulta_df_t['product_id'].isin(not_in_secret_sales)]
+        .set_index('product_id')
     )
     return(not_in_secret_sales_df)
 
@@ -284,7 +278,7 @@ def add_old_price(secret_sales_in_stock):
         if '-' not in ulta_df_price and '-' not in old_secret_sales_old_price and '-' not in old_ulta_df_price: #ulta_df_price in format $a.aa, old_secret_sales_old_price in format $f.ff, old_ulta_df_price in format #$x.xx
             max_price = max(float(ulta_df_price[1:]), float(old_secret_sales_old_price[1:]), float(old_ulta_df_price[1:])) #get max of $a.aa, $f.ff, and $x.xx
             max_price_str = ('$' + str(format(max_price, '.2f')))
-            old_price.append(max_price_str)
+            old_price.append(max_price_str.strip())
         else:
             #if price in format $x.xx, price_float = x.xx. if price in format $x.xx - $y.yy, price_float = y.yy, the max of x.xx and y.yy.
             if '-' in ulta_df_price:
@@ -302,13 +296,13 @@ def add_old_price(secret_sales_in_stock):
             max_price = max(ulta_df_price_float, old_secret_sales_old_price_float, old_ulta_df_price_float)
             if 'Sizes' not in secret_sales_in_stock.iloc[i]['options']: #for products with different sizes, if the price in format $x.xx - $y.yy, it doesn't mean $x.xx is min and $y.yy is max
                 max_price_str = ('$' + str(format(max_price, '.2f')))
-                old_price.append(max_price_str)
+                old_price.append(max_price_str.strip())
             else:
                 print(secret_sales_in_stock.iloc[i].name, ulta_df_price, old_secret_sales_old_price, old_ulta_df_price) #for investigating
                 if max_price == old_secret_sales_old_price_float:
-                    old_price.append(old_secret_sales_old_price)
+                    old_price.append(old_secret_sales_old_price.strip())
                 elif max_price == old_ulta_df_price:
-                    old_price.append(old_ulta_df_price)
+                    old_price.append(old_ulta_df_price.strip())
                 else:
                     old_price.append(ulta_df_price)
     secret_sales_in_stock['old_price'] = old_price
@@ -361,9 +355,17 @@ def remove_bad_deals(secret_sales_in_stock):
     secret_sales_in_stock = (
         df
         .pipe(copy.deepcopy)
-        .set_index('id')
+        .set_index('product_id')
         )
     return(secret_sales_in_stock)
+
+def add_name(df):
+    name = []
+    for i in range(len(df)):
+        product_name = df.iloc[i]['brand'] + ' ' + df.iloc[i]['product']
+        name.append(product_name)
+    df['name'] = name
+    return(df)
                 
             
             
