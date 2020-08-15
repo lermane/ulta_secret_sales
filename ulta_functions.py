@@ -134,8 +134,8 @@ def clean_changed_prices_df(changed_prices_df):
                 if old_price in current_price: #if $a.aa = $x.xx or $a.aa = $y.yy
                     df = df.drop([changed_prices_df.iloc[i].name])
             elif ('Sizes' in old_options) and ('Sizes' in current_options): #size options changed both having 2+ options; old_price format $a.aa - $b.bb current_price format $x.xx - $y.yy
-                #if .aa = .bb = .xx = .yy and none of them equal .97
-                if (old_price.split(' - ')[0][-2:] == old_price.split(' - ')[1][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[0][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[1][-2:]) and (old_price.split(' - ')[0][-2:] != 97):
+                #if .aa = .bb = .xx = .yy
+                if (old_price.split(' - ')[0][-2:] == old_price.split(' - ')[1][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[0][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[1][-2:]):
                     df = df.drop([changed_prices_df.iloc[i].name])
         else:
             if ('-' in old_price) and ('-' not in current_price): #old_price in format $a.aa - $b.bb and current_price in format $x.xx
@@ -345,10 +345,13 @@ def remove_bad_deals(secret_sales_in_stock):
     secret_sales_in_stock = secret_sales_in_stock.reset_index() #if there are multiple prices for a product, I don't want every entry to be removed, just the one that vialates the if/else statement below
     df = copy.deepcopy(secret_sales_in_stock)
     for i in range(len(secret_sales_in_stock)):
-        if '-' in secret_sales_in_stock.iloc[i]['old_price'] or secret_sales_in_stock.iloc[i]['old_price'] == ' ':
+        if secret_sales_in_stock.iloc[i]['old_price'] == ' ':
             next
+        elif '-' in secret_sales_in_stock.iloc[i]['old_price']: #price in format $a.aa, old_price in format $x.xx - $y.yy
+            if ('Colors' not in secret_sales_in_stock.iloc[i]['options']) and (secret_sales_in_stock.iloc[i]['old_price'].split(' - ')[0][-2:] == secret_sales_in_stock.iloc[i]['old_price'].split(' - ')[1][-2:]) and (secret_sales_in_stock.iloc[i]['old_price'].split(' - ')[0][-2:] == str(secret_sales_in_stock.iloc[i]['price2'][-2:])): #if .aa == .xx == .yy (okay if color options)
+                df = df.drop([secret_sales_in_stock.iloc[i].name])
         else:
-            current_price = float(secret_sales_in_stock.iloc[i]['price']) #should be a float already but i'm paranoid
+            current_price = float(secret_sales_in_stock.iloc[i]['price2']) #should be a float already but i'm paranoid
             old_price = float(secret_sales_in_stock.iloc[i]['old_price'][1:])
             if (current_price / old_price > .9) and ('.97' not in str(current_price)) and ('.97' not in str(old_price)):
                 df = df.drop([secret_sales_in_stock.iloc[i].name])

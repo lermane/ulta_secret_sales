@@ -117,8 +117,9 @@ products_in_stock_df = (
     pd.DataFrame.from_dict(products_in_stock)
     .transpose()
     .reset_index()
-    .rename(columns={'index' : 'product_id'})
-    .pipe(pd.melt, id_vars=['product_id'], var_name='price2', value_name='options2')
+    .rename(columns={'index' : 'product_id'}) #the product_id had to be an actual column for it to work
+    #turning dataframe from wide to long (source: http://www.datasciencemadesimple.com/reshape-wide-long-pandas-python-melt-function/)
+    .pipe(pd.melt, id_vars=['product_id'], var_name='price2', value_name='options2') #the column names were the prices and the values were the options for that price
     .dropna()
     .set_index('product_id')
 )
