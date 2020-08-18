@@ -12,6 +12,9 @@ import copy
 import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 #using the ids to create real urls
 def create_url_dict(session):
@@ -133,7 +136,7 @@ def clean_changed_prices_df(changed_prices_df):
             elif (old_options == ' ') and ('Sizes' in current_options): #there used to be only 1 size option but now there are more; old_price format $a.aa current_price format $x.xx - $y.yy
                 if old_price in current_price: #if $a.aa = $x.xx or $a.aa = $y.yy
                     df = df.drop([changed_prices_df.iloc[i].name])
-            elif ('Sizes' in old_options) and ('Sizes' in current_options): #size options changed both having 2+ options; old_price format $a.aa - $b.bb current_price format $x.xx - $y.yy
+            elif ('Sizes' in old_options) and ('Sizes' in current_options) and ('-' in old_price) and ('-' in current_price): #size options changed both having 2+ options; old_price format $a.aa - $b.bb current_price format $x.xx - $y.yy
                 #if .aa = .bb = .xx = .yy
                 if (old_price.split(' - ')[0][-2:] == old_price.split(' - ')[1][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[0][-2:]) and (old_price.split(' - ')[0][-2:] == current_price.split(' - ')[1][-2:]):
                     df = df.drop([changed_prices_df.iloc[i].name])
@@ -173,6 +176,7 @@ def get_secret_sales_not_in_df(secret_sales_df, old_secret_sales_in_stock, ulta_
     return(not_in_secret_sales_df)
 
 def get_products_in_stock(secret_sales, driver):
+    wait = WebDriverWait(driver, 30)
     products_in_stock = {}
     for product_id in secret_sales:
         temp = {} #used to temporarily store product data until 
@@ -183,7 +187,7 @@ def get_products_in_stock(secret_sales, driver):
             next
         #making sure that the url is correct
         elif driver.current_url.split('productId=')[1] != product_id:
-            time.sleep(5)
+            wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a")))
             driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
             driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(product_id)
             driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
@@ -191,7 +195,7 @@ def get_products_in_stock(secret_sales, driver):
                 next
             elif driver.current_url.split('productId=')[1] == product_id:
                 secret_sales[product]['url'] = driver.current_url
-                time.sleep(1)
+        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'ProductSwatchImage__variantHolder')))
         #getting all the product variants from the page
         product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
         if len(product_variants) == 0:
@@ -203,7 +207,7 @@ def get_products_in_stock(secret_sales, driver):
             except:         
                 next #if I can't click on it I want to go to the next variant
             else:
-                time.sleep(1)
+                wait.until(EC.presence_of_element_located((By.XPATH, "/html/head/meta[10]")))
                 #creating a BeautifulSoup object to extract data
                 soup = BeautifulSoup(driver.page_source, features="lxml")
                 #there are products that only a couple of shades are labeled as sale so I'm removing those to make sure no sale items slip through

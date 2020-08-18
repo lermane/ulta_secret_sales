@@ -1,6 +1,7 @@
 #ignore credential files
 *.json
 *.pickle
+*.ini
 google_sheets_credentials.py
 
 #ignore testing file
