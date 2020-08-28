@@ -90,10 +90,13 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product = {}
     #get general product data from each product
     product_id = product_container.find('span', {'class' : 'prod-id'}).text.strip()
-    product['url'] = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
     product['brand'] = product_container.find('h4', {'class' : 'prod-title'}).text.strip()
     #description is the name of the product. so if there's a product called "ULTA Fabulous Concealer", "ULTA" would be the brand and "Fabulous Concealer" would be the description.
     product['product'] = product_container.find('p', {'class' : 'prod-desc'}).text.strip()
+    product_url = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
+    if product_url.split('productId=')[1] != product_id:
+        product_url = 'https://www.ulta.com/' + product['product'].replace(' ', '-').lower() + '?productId=' + product_id
+    product['url'] = product_url
     #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
     if product_container.find('label', {'class' : 'sr-only'}) is not None:
         rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
@@ -155,12 +158,7 @@ def clean_changed_prices_df(changed_prices_df):
             elif ('-' not in current_price) and ('-' not in old_price): #old_price in format $a.aa and current_price in format $x.xx
                 if float(current_price[1:]) >= float(old_price[1:]): #if $x.xx >= $a.aa
                     df = df.drop([changed_prices_df.iloc[i].name])
-    changed_prices_df = (
-        df
-        .pipe(copy.deepcopy)
-        .drop(columns={'old_price', 'old_sale', 'old_options'})
-    )
-    return(changed_prices_df)
+    return(df)
 
 def get_secret_sales_not_in_df(secret_sales_df, old_secret_sales_in_stock, ulta_df):
     query = "product_id not in {}".format(secret_sales_df.index.tolist())
@@ -195,7 +193,7 @@ def get_products_in_stock(secret_sales, driver):
                 next
             elif driver.current_url.split('productId=')[1] == product_id:
                 secret_sales[product]['url'] = driver.current_url
-        wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'ProductSwatchImage__variantHolder')))
+        time.sleep(1)
         #getting all the product variants from the page
         product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
         if len(product_variants) == 0:
@@ -373,6 +371,3 @@ def add_name(df):
         name.append(product_name)
     df['name'] = name
     return(df)
-                
-            
-            

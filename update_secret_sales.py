@@ -65,6 +65,7 @@ changed_prices_df = (
     .query('sale == 0 & old_sale == 0')
     .fillna(value={'old_options': ' ', 'options': ' '})
     .pipe(ulta.clean_changed_prices_df)
+    .drop(columns={'old_price', 'old_sale', 'old_options'})
 )
 
 #getting products with different color options and more than one price listed
