@@ -101,7 +101,7 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     if product_container.find('label', {'class' : 'sr-only'}) is not None:
         rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
         if rating == 'Price':
-            rating = 0
+            rating = 0.00
         product['rating'] = rating
     if product_container.find('span', {'class' : 'prodCellReview'}) is not None:
         product['no_of_reviews'] = re.findall(r'\b\d+\b', product_container.find('span', {'class' : 'prodCellReview'}).text)[0]
