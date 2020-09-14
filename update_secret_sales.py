@@ -178,7 +178,7 @@ gapi.Add_Hyperlinks(creds.get_sheet_id('main_local'), df, hyperlink_urls)
 gapi.Add_Percent_Format(creds.get_sheet_id('main_local'), len(df))
 
 print('saving data')
-secret_sales_in_stock.to_csv('data/new_secret_sales_in_stock.csv')
-ulta_df.to_csv('data/new_ulta_df.csv')
+secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
+ulta_df.to_csv('data/ulta_df.csv')
 
 print('DONE')

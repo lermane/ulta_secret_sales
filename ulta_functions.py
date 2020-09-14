@@ -21,7 +21,7 @@ def create_url_dict(session):
     all_url_info = {}
     #I'm pulling the list of urls straight from ulta's sidebar
     front_page = session.get('https://www.ulta.com/')
-    front_page_soup = BeautifulSoup(front_page.content, features="lxml")
+    front_page_soup = BeautifulSoup(front_page.text, features="lxml")
     #anchors = list of links in the side bar
     anchors = front_page_soup.find_all('a', {'class' : 'Anchor'})
     for anchor in anchors:
@@ -32,7 +32,7 @@ def create_url_dict(session):
             #I do not want urls from these anchors
             if url_path[0] not in ['shop by brand', 'new arrivals', 'ulta beauty collection', 'gifts', 'sale & coupons', 'beauty tips'] and url_path[1] != 'featured':
                 page = session.get(anchor.get('href'))
-                soup = BeautifulSoup(page.content, features="lxml")
+                soup = BeautifulSoup(page.text, features="lxml")
                 #get the number of total products from each id so we can create a different url for each set of 500 products in the url so there isn't too much data loaded into one url at once
                 num_results = int(re.findall(r'\b\d+\b', soup.find('h2', {'class' : 'search-res-title'}).find('span', {'class' : 'sr-only'}).text)[0])
                 for i in range(math.ceil(num_results / 500)):
@@ -70,7 +70,7 @@ def scrape_url(url, session, products, all_url_info):
     #going to the url
     page = session.get(url)
     #getting the page's content and using the package BeautifulSoup to extract data from it
-    soup = BeautifulSoup(page.content, features="lxml")
+    soup = BeautifulSoup(page.text, features="lxml")
     #each product on ulta's website has a container with the class "productQvContainer" so I'm getting every element that has that as a class to pull every product
     product_containers = soup.find_all('div', {'class' : 'productQvContainer'})
     main_category = all_url_info[url]['main_category']
@@ -90,10 +90,16 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     product = {}
     #get general product data from each product
     product_id = product_container.find('span', {'class' : 'prod-id'}).text.strip()
+    product['sku_id'] = str(product_container.find('a', {'class' : 'qShopbutton'}).get('data-skuidrr'))
     product['brand'] = product_container.find('h4', {'class' : 'prod-title'}).text.strip()
     #description is the name of the product. so if there's a product called "ULTA Fabulous Concealer", "ULTA" would be the brand and "Fabulous Concealer" would be the description.
     product['product'] = product_container.find('p', {'class' : 'prod-desc'}).text.strip()
-    product_url = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
+    #sometimes the https://www.ulta.com is already in the url and sometimes (most of the time) it's not.
+    if product_container.find('a', {'class' : 'product'}).get('href')[0] != '/':
+        product_url = product_container.find('a', {'class' : 'product'}).get('href')
+    else:
+        product_url = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
+    #if the correct product id isn't in the url then the url is wrong. if it's wrong, then we need to fix it.
     if product_url.split('productId=')[1] != product_id:
         product_url = 'https://www.ulta.com/' + product['product'].replace(' ', '-').lower() + '?productId=' + product_id
     product['url'] = product_url
