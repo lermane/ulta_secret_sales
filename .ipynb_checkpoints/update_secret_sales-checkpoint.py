@@ -13,15 +13,16 @@ from selenium.webdriver.chrome.options import Options
 
 print('starting')
 
-print('opening session')
-session = requests.Session()
-all_url_info = ulta.get_url_dict(session)
+#print('opening session')
+#session = requests.Session()
+#all_url_info = ulta.get_url_dict(session)
+all_url_info = ulta.get_url_dict()
 urls = all_url_info.keys()
 
 print("getting product data from ulta's website")
 products = {}
 with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    futures = {executor.submit(ulta.scrape_url, url, session, products, all_url_info): url for url in urls}
+    futures = {executor.submit(ulta.scrape_url, url, products, all_url_info): url for url in urls}
     for future in concurrent.futures.as_completed(futures):
         url = futures[future]
         try:
@@ -30,8 +31,8 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
             print(url, ':', exc)
         else:
             products = data
-print('closing session')            
-session.close()
+#print('closing session')            
+#session.close()
 
 print('creating ulta_df')
 #creating a df from the data
@@ -65,6 +66,7 @@ changed_prices_df = (
     .query('sale == 0 & old_sale == 0')
     .fillna(value={'old_options': ' ', 'options': ' '})
     .pipe(ulta.clean_changed_prices_df)
+    .drop(columns={'old_price', 'old_sale', 'old_options'})
 )
 
 #getting products with different color options and more than one price listed
@@ -103,13 +105,19 @@ secret_sales = (
 
 print('scraping product data using selenium')
 #finding out which products are in stock
-chrome_options = Options()
-chrome_options.add_argument("--headless")
-driver = webdriver.Chrome(r'C:\Users\elerm\Downloads\chromedriver_win32\chromedriver.exe', options = chrome_options)
-products_in_stock, secret_sales = ulta.get_products_in_stock(secret_sales, driver)
-driver.close()
-driver.quit()
+products_in_stock = {}
+with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+    future_to_product_id = {executor.submit(ulta.get_product_in_stock, product_id, prod_dict):product_id for product_id, prod_dict in secret_sales.items()}
+    for future in concurrent.futures.as_completed(future_to_product_id):
+        product_id = future_to_product_id[future]
+        try:
+            data = future.result()
+            products_in_stock[product_id] = data
+        except Exception as exc:
+            print('%r generated an exception: %s' % (product_id, exc))
 print('done with selenium!')
+
+pd.DataFrame.from_dict(products_in_stock).to_csv('data/products_in_stock_new.csv')
 
 print('creating secret_sales_in_stock')
 #df of products that are in stock
@@ -177,7 +185,7 @@ gapi.Add_Hyperlinks(creds.get_sheet_id('main_local'), df, hyperlink_urls)
 gapi.Add_Percent_Format(creds.get_sheet_id('main_local'), len(df))
 
 print('saving data')
-secret_sales_in_stock.to_csv('data/new_secret_sales_in_stock.csv')
-ulta_df.to_csv('data/new_ulta_df.csv')
+secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
+ulta_df.to_csv('data/ulta_df.csv')
 
 print('DONE')

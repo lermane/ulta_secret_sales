@@ -6,158 +6,187 @@ import datetime
 import os
 from bs4 import BeautifulSoup
 import re
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+import ulta_functions as ulta
 
-def create_url_df():
-    all_url_info = {}
-    #I'm pulling the list of urls straight from ulta's sidebar
-    front_page = requests.get('https://www.ulta.com/')
-    front_page_soup = BeautifulSoup(front_page.text, features="lxml")
-    #anchors = list of links in the side bar
-    anchors = front_page_soup.find_all('a', {'class' : 'Anchor'})
-    for anchor in anchors:
-        #make sure there's a description; I'm getting the categories from the description
-        if anchor.get('data-nav-description') is not None and re.search(r'[a-z]*:[a-z]*', anchor.get('data-nav-description')) is not None:
-            #split up url path into pieces
-            url_path = anchor.get('data-nav-description')[4:].split(':')
-            #I do not want urls from these anchors
-            if url_path[0] not in ['shop by brand', 'new arrivals', 'ulta beauty collection', 'gifts', 'sale & coupons', 'beauty tips'] and url_path[1] != 'featured':
-                page = requests.get(anchor.get('href'))
-                soup = BeautifulSoup(page.text, features="lxml")
-                #get the number of total products from each id so we can create a different url for each set of 500 products in the url so there isn't too much data loaded into one url at once
-                num_results = int(re.findall(r'\b\d+\b', soup.find('h2', {'class' : 'search-res-title'}).find('span', {'class' : 'sr-only'}).text)[0])
-                for i in range(math.ceil(num_results / 500)):
-                    #creating a dictionary to have each url be linked to its id, main category, and sub category
-                    url_info = {}
-                    url_info['main_category'] = url_path[0]
-                    url_info['sub_category'] = url_path[1]
-                    if len(url_path) == 2: #if the length != 2 then the url path has at least 3 parts which means we can get a sub sub sub category from it 
-                        url_info['sub_sub_category'] = ' '
-                    else:
-                        url_info['sub_sub_category'] = url_path[2]
-                    #the &No= tag is the number of products on that page starting from 0 and &Nrpp=500 means there will be at most 500 products on each page
-                    url = anchor.get('href') + '&No=' + str(i * 500) + '&Nrpp=500'
-                    all_url_info[url] = url_info
-    url_df = (
-        pd.DataFrame.from_dict(all_url_info)
-        .transpose()
-        .reset_index()
-        .rename(columns={'index' : 'url'})
-        .rename_axis('url_pkey')
-    )
-    url_df.to_csv('data/url_df.csv')
+chrome_options = Options()
+chrome_options.add_argument("--headless")
 
-def get_url_df():
-    #getting the last modified date of my url_df.csv file
-    last_mod_time = os.path.getmtime('data/url_df.csv')
-    #getting number of days since last file modification date
-    days_since_urls_update = (datetime.datetime.today() - datetime.datetime.fromtimestamp(last_mod_time)).days
-    #if it has been at least 5 days since the last time the all_url_info_dict.json file was modified, then update
-    if days_since_urls_update >= 5:
-        create_url_df()
-    #return url_df
-    url_df = pd.read_csv('data/url_df.csv')
-    return(url_df)
+def get_product_in_stock(product_id, prod_dict):    
+    with webdriver.Chrome(r'C:\Users\emily\Downloads\chromedriver_win32\chromedriver.exe', options=chrome_options) as driver:
+        wait = WebDriverWait(driver, 30)
+        temp = {}
 
-def scrape_url(row):
-    products = {}
-    #going to the url
-    page = requests.get(row['url'])
-    #getting the page's content and using the package BeautifulSoup to extract data from it
-    soup = BeautifulSoup(page.text, features="lxml")
-    #each product on ulta's website has a container with the class "productQvContainer" so I'm getting every element that has that as a class to pull every product
-    product_containers = soup.find_all('div', {'class' : 'productQvContainer'})
-    #applying the function get_single_product for each product in the url. if it throws an exception, I'm having it print the url and index so I can tell what product is having a problem.
-    for product_container in product_containers:
+        driver.get(prod_dict['url'])
+
+        if driver.current_url == 'https://www.ulta.com/404.jsp': #if the product doesn't exist anymore ulta wil take you to this site
+            next
+        #making sure that the url is correct
+        elif driver.current_url.split('productId=')[1] != product_id:
+            wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a")))
+            driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
+            driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(product_id)
+            driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
+            if driver.current_url == 'https://www.ulta.com/404.jsp':
+                next
+            elif driver.current_url.split('productId=')[1] == product_id:
+                prod_dict['url'] = driver.current_url
+
+        time.sleep(1)
+
         try:
-            product, product_id = get_single_product(soup, product_container, row.name)
-            products[product_id] = product
+            soup = BeautifulSoup(driver.page_source, features="lxml")
+            if soup.find('div', {'class' : 'ProductSwatches__viewOptionsHolder'}) != None:
+                driver.find_element_by_xpath("/html/body/div[1]/div[4]/div/div/div/div/div/div/section[1]/div[3]/div/div[2]/div/button").click()
+            product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
+            if len(product_variants) == 0:
+                #products that only have one color or one size or whatever have their product variant information in a different lcoation
+                product_variants = driver.find_elements_by_class_name('ProductDetail__productSwatches')
+            for product_variant in product_variants:
+                try:
+                    product_variant.click() #clicking on each variant at a time to get their price and availability
+                except:         
+                    next #if I can't click on it I want to go to the next variant
+                else:
+                    wait.until(EC.presence_of_element_located((By.XPATH, "/html/head/meta[10]")))
+                    time.sleep(1)
+                    #creating a BeautifulSoup object to extract data
+                    soup = BeautifulSoup(driver.page_source, features="lxml")
+                    #there are products that only a couple of shades are labeled as sale so I'm removing those to make sure no sale items slip through
+                    if soup.find('img', {'src' : 'https://images.ulta.com/is/image/Ulta/badge-sale?fmt=png-alpha'}) is not None:
+                        next
+                    #getting price
+                    price = soup.find('meta', {'property' : 'product:price:amount'}).get('content')
+                    keep = ulta.bool_keep(price, product_id, prod_dict['price'])
+                    if keep == True:
+                        option = ulta.get_option(soup)
+                        #only adding the product variant if it's available
+                        if soup.find('div', {'class' : 'ProductDetail__availabilitySection ProductDetail__availabilitySection--error'}) is None:
+                            temp[option] = price
+            if bool(temp):
+                variants_in_stock = ulta.rearrange_product_dict(temp)
+            else:
+                variants_in_stock = {}
         except Exception as exc:
-            print(row['url'], product_containers.index(product_container))
-            print(exc, '\n')
-    products_df = (
-        pd.DataFrame.from_dict(products)
-        .transpose()
-    )
-    return(products_df)
+            print(product_id, exc)
+            variants_in_stock = {}
+        finally:
+            return(variants_in_stock)    
 
-def get_single_product(soup, product_container, url_pkey):
-    product = {}
-    #get general product data from each product
-    product_id = product_container.find('span', {'class' : 'prod-id'}).text.strip()
-    product['sku_id'] = str(product_container.find('a', {'class' : 'qShopbutton'}).get('data-skuidrr'))
-    product['brand'] = product_container.find('h4', {'class' : 'prod-title'}).text.strip()
-    #description is the name of the product. so if there's a product called "ULTA Fabulous Concealer", "ULTA" would be the brand and "Fabulous Concealer" would be the description.
-    product['product'] = product_container.find('p', {'class' : 'prod-desc'}).text.strip()
-    #sometimes the https://www.ulta.com is already in the url and sometimes (most of the time) it's not.
-    if product_container.find('a', {'class' : 'product'}).get('href')[0] != '/':
-        product_url = product_container.find('a', {'class' : 'product'}).get('href')
-    else:
-        product_url = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
-    #if the correct product id isn't in the url then the url is wrong. if it's wrong, then we need to fix it.
-    if product_url.split('productId=')[1] != product_id:
-        product_url = 'https://www.ulta.com/' + product['product'].replace(' ', '-').lower() + '?productId=' + product_id
-    product['url'] = product_url
-    #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
-    if product_container.find('label', {'class' : 'sr-only'}) is not None:
-        rating = product_container.find('label', {'class' : 'sr-only'}).text.split(' ')[0]
-        if rating == 'Price':
-            rating = 0.00
-        product['rating'] = rating
-    if product_container.find('span', {'class' : 'prodCellReview'}) is not None:
-        product['no_of_reviews'] = re.findall(r'\b\d+\b', product_container.find('span', {'class' : 'prodCellReview'}).text)[0]
-    #the prices are labeled differently in the code depending on whether the product is for sale or not (for sale as in marked as sale not a secret sale)
-    if product_container.find('div', {'class' : 'productSale'}) is None:
-        product['sale'] = 0
-        product['price'] = product_container.find('span', {'class' : 'regPrice'}).text.strip()
-    else:
-        product['sale'] = 1
-        product['price'] = product_container.find('span', {'class' : 'pro-old-price'}).text.strip()
-        product['sale_price'] = product_container.find('span', {'class' : 'pro-new-price'}).text.strip()
-    #getting the available offers and number of options/colors of the product if they're listed
-    if product_container.find('div', {'class' : 'product-detail-offers'}) is not None:
-        product['offers'] = product_container.find('div', {'class' : 'product-detail-offers'}).text.strip()
-    if product_container.find('span', {'class' : 'pcViewMore'}) is not None:
-        product['options'] = re.sub('\xa0', ' ', product_container.find('span', {'class' : 'pcViewMore'}).text.strip())
-    product['url_pkey_foreign'] = url_pkey
-    return(product, product_id)
+def multithreading_5(secret_sales):
+    print('START MULTITHREADING...')
+    prod_stock = {}
+    start = time.perf_counter()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        future_to_product_id = {executor.submit(get_product_in_stock, product_id, prod_dict):product_id for product_id, prod_dict in secret_sales.items()}
+        for future in concurrent.futures.as_completed(future_to_product_id):
+            product_id = future_to_product_id[future]
+            try:
+                data = future.result()
+                prod_stock[product_id] = data
+            except Exception as exc:
+                print('%r generated an exception: %s' % (product_id, exc))
 
-def multithreading():
-    print('MULTITHREADING')
+    finish = time.perf_counter()
+
+    return(round(finish-start, 2))
     
+def multithreading_10(secret_sales):
+    print('START MULTITHREADING...')
+    prod_stock = {}
+    start = time.perf_counter()
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_product_id = {executor.submit(get_product_in_stock, product_id, prod_dict):product_id for product_id, prod_dict in secret_sales.items()}
+        for future in concurrent.futures.as_completed(future_to_product_id):
+            product_id = future_to_product_id[future]
+            try:
+                data = future.result()
+                prod_stock[product_id] = data
+            except Exception as exc:
+                print('%r generated an exception: %s' % (product_id, exc))
+
+    finish = time.perf_counter()
+
+    return(round(finish-start, 2))
+
+def multithreading(secret_sales):
+    print('START MULTITHREADING...')
+    prod_stock = {}
     start = time.perf_counter()
     with concurrent.futures.ThreadPoolExecutor() as executor:
-        url_df = get_url_df().set_index('url_pkey')
-    
-        rows = []
-        for index, row in url_df.iterrows():
-            rows.append(row)
-            
-        results = executor.map(scrape_url, rows)
+        future_to_product_id = {executor.submit(get_product_in_stock, product_id, prod_dict):product_id for product_id, prod_dict in secret_sales.items()}
+        for future in concurrent.futures.as_completed(future_to_product_id):
+            product_id = future_to_product_id[future]
+            try:
+                data = future.result()
+                prod_stock[product_id] = data
+            except Exception as exc:
+                print('%r generated an exception: %s' % (product_id, exc))
 
     finish = time.perf_counter()
 
-    print(f'Finished in {round(finish-start, 2)} second(s)')
+    return(round(finish-start, 2))
+
+def multiprocessing(secret_sales):
+    print('START MULTIPROCESSING...')
     
-def multiprocessing():
-    print('MULTIPROCESSING')
-    
+    prod_stock = {}
     start = time.perf_counter()
     with concurrent.futures.ProcessPoolExecutor() as executor:
-        url_df = get_url_df().set_index('url_pkey')
-    
-        rows = []
-        for index, row in url_df.iterrows():
-            rows.append(row)
-            
-        results = executor.map(scrape_url, rows)
+        for product_id, data in zip(secret_sales.keys(), executor.map(get_product_in_stock, secret_sales.keys(), secret_sales.values())):
+            try:
+                prod_stock[product_id] = data
+            except Exception as exc:
+                print('%r generated an exception: %s' % (product_id, exc))
 
     finish = time.perf_counter()
 
-    print(f'Finished in {round(finish-start, 2)} second(s)')
-
-if __name__ == '__main__':
+    return(round(finish-start, 2))
     
-    multithreading()
-    print('\n\n')
-    multiprocessing()
-        
+def forloop(secret_sales):
+    print('START FOR LOOP...')
+    
+    prod_stock = {}
+    start = time.perf_counter()
+    for product_id, prod_dict in secret_sales.items():
+        try:
+            data = get_product_in_stock(product_id, prod_dict)
+            prod_stock[product_id] = data
+        except Exception as exc:
+            print('%r generated an exception: %s' % (product_id, exc))
+
+    finish = time.perf_counter()
+
+    return(round(finish-start, 2))
+
+def main():
+    secret_sales = pd.read_csv('data/secret_sales_df.csv')[0:20].set_index('product_id').to_dict(orient='index')
+    multithreading_time = multithreading(secret_sales)
+    time.sleep(10)
+    multithreading_5_time = multithreading_5(secret_sales)
+    time.sleep(10)
+    multithreading_10_time = multithreading_10(secret_sales)
+    #multiprocessing_time = multiprocessing(secret_sales)
+    #forloop_time = forloop(secret_sales)
+    
+    print("\n\nMULTITHREADING with no max workers given:")
+    print(f'Finished in {multithreading_time} second(s)')
+    
+    print("\n\nMULTITHREADING with 5 max workers:")
+    print(f'Finished in {multithreading_5_time} second(s)')
+    
+    print("\n\nMULTITHREADING with 10 max workers:")
+    print(f'Finished in {multithreading_10_time} second(s)')
+    
+    #print("\n\nMULTIPROCESSING:")
+    #print(f'Finished in {multiprocessing_time} second(s)')
+    
+    #print("\n\nFORLOOP:")
+    #print(f'Finished in {forloop_time} second(s)')
+    
+if __name__ == '__main__':
+    main()

@@ -123,7 +123,7 @@ def get_single_product(soup, product_container, url_pkey):
 
 def multithreading():
     print('MULTITHREADING')
-    
+
     start = time.perf_counter()
     with concurrent.futures.ThreadPoolExecutor() as executor:
         url_df = get_url_df().set_index('url_pkey')
