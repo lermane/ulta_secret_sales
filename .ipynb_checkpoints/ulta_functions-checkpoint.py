@@ -9,54 +9,85 @@ import time
 import os
 import math
 import copy
+import sys
 import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.desired_capabilities import DesiredCapabilities
 
 #PROXY = '54.215.45.148:3128'
 #proxy = {"http": PROXY, "https": PROXY}
 chrome_options = Options()
 chrome_options.add_argument('--headless')
 #chrome_options.add_argument('--proxy-server=%s' % PROXY)
+chromedriver_path = r'/home/lermane/Downloads/chromedriver_linux64/chromedriver'
+capabilities = DesiredCapabilities.CHROME.copy()
+capabilities['goog:loggingPrefs'] = {'performance': 'ALL'}
+
+#https://stackoverflow.com/questions/5799228/how-to-get-status-code-by-using-selenium-py-python-code (Jarad)
+def get_status(logs):
+    for log in logs:
+        if log['message']:
+            d = json.loads(log['message'])
+            try:
+                content_type = 'text/html' in d['message']['params']['response']['headers']['content-type']
+                response_received = d['message']['method'] == 'Network.responseReceived'
+                if content_type and response_received:
+                    return d['message']['params']['response']['status']
+            except:
+                pass
 
 #using the ids to create real urls
 def create_url_dict():
+    #https://stackoverflow.com/questions/5799228/how-to-get-status-code-by-using-selenium-py-python-code (Jarad)
+
     all_url_info = {}
-    #I'm pulling the list of urls straight from ulta's sidebar
-    front_page = requests.get('https://www.ulta.com/')
-    front_page_soup = BeautifulSoup(front_page.text, features="lxml")
-    #anchors = list of links in the side bar
-    anchors = front_page_soup.find_all('a', {'class' : 'Anchor'})
-    for anchor in anchors:
-        #make sure there's a description; I'm getting the categories from the description
-        if anchor.get('data-nav-description') is not None and re.search(r'[a-z]*:[a-z]*', anchor.get('data-nav-description')) is not None:
-            #split up url path into pieces
-            url_path = anchor.get('data-nav-description')[4:].split(':')
-            #I do not want urls from these anchors
-            if url_path[0] not in ['shop by brand', 'new arrivals', 'ulta beauty collection', 'gifts', 'sale & coupons', 'beauty tips'] and url_path[1] != 'featured':
-                page = requests.get(anchor.get('href'))
-                soup = BeautifulSoup(page.text, features="lxml")
-                #get the number of total products from each id so we can create a different url for each set of 500 products in the url so there isn't too much data loaded into one url at once
-                num_results = int(re.findall(r'\b\d+\b', soup.find('h2', {'class' : 'search-res-title'}).find('span', {'class' : 'sr-only'}).text)[0])
-                for i in range(math.ceil(num_results / 500)):
-                    #creating a dictionary to have each url be linked to its id, main category, and sub category
-                    url_info = {}
-                    url_info['main_category'] = url_path[0]
-                    url_info['sub_category'] = url_path[1]
-                    if len(url_path) == 2: #if the length != 2 then the url path has at least 3 parts which means we can get a sub sub sub category from it 
-                        url_info['sub_sub_category'] = ' '
-                    else:
-                        url_info['sub_sub_category'] = url_path[2]
-                    #the &No= tag is the number of products on that page starting from 0 and &Nrpp=500 means there will be at most 500 products on each page
-                    url = anchor.get('href') + '&No=' + str(i * 500) + '&Nrpp=500'
-                    all_url_info[url] = url_info
-    #we're saving the results into a .json file
-    f = open('data/all_url_info_dict.json', 'w')
-    json.dump(all_url_info, f)
-    f.close()
+
+    with WebDriver(chromedriver_path, options=chrome_options, desired_capabilities=capabilities) as driver:
+        driver.get('https://www.ulta.com/')
+        logs = driver.get_log('performance')
+        current_status = get_status(logs)
+        if current_status != 200:
+            print('ERROR GETTING PAGE:', current_status)
+        else:
+            driver.find_element_by_xpath("""/html/body/div[1]/div[3]/div/div/div/div/div/div[1]""")
+            menu_button = driver.find_element_by_xpath("""/html/body/div[1]/div[3]/div/div/div/div/div/div[1]""")
+            menu_button.click()
+            soup = BeautifulSoup(driver.page_source)
+
+            anchors = soup.find_all('a', {'class' : 'Anchor'})
+            for anchor in anchors:
+                #make sure there's a description; I'm getting the categories from the description
+                if anchor.get('data-nav-description') is not None and re.search(r'[a-z]*:[a-z]*', anchor.get('data-nav-description')) is not None:
+                    #split up url path into pieces
+                    url_path = anchor.get('data-nav-description')[4:].split(':')
+                    #I do not want urls from these anchors
+                    if url_path[0] not in ['shop by brand', 'new arrivals', 'ulta beauty collection', 'gifts', 'sale & coupons', 'beauty tips'] and url_path[1] != 'featured':
+                        page = requests.get(anchor.get('href'))
+                        soup = BeautifulSoup(page.text, features="lxml")
+                        #get the number of total products from each id so we can create a different url for each set of 500 products in the url so there isn't too much data loaded into one url at once
+                        if soup.find('h2', {'class' : 'search-res-title'}) is not None:
+                            num_results = int(re.findall(r'\b\d+\b', soup.find('h2', {'class' : 'search-res-title'}).find('span', {'class' : 'sr-only'}).text)[0])
+                            for i in range(math.ceil(num_results / 500)):
+                                #creating a dictionary to have each url be linked to its id, main category, and sub category
+                                url_info = {}
+                                url_info['main_category'] = url_path[0]
+                                url_info['sub_category'] = url_path[1]
+                                if len(url_path) == 2: #if the length != 2 then the url path has at least 3 parts which means we can get a sub sub sub category from it 
+                                    url_info['sub_sub_category'] = ' '
+                                else:
+                                    url_info['sub_sub_category'] = url_path[2]
+                                #the &No= tag is the number of products on that page starting from 0 and &Nrpp=500 means there will be at most 500 products on each page
+                                url = anchor.get('href') + '&No=' + str(i * 500) + '&Nrpp=500'
+                                all_url_info[url] = url_info
+            #we're saving the results into a .json file
+            f = open('data/all_url_info_dict.json', 'w')
+            json.dump(all_url_info, f)
+            f.close()
     
 def get_url_dict():
     #getting the last modified date of my all_url_info_dict.json file
@@ -76,23 +107,36 @@ def scrape_url(url, products, all_url_info):
     time.sleep(1)
     #going to the url
     page = requests.get(url)
-    #getting the page's content and using the package BeautifulSoup to extract data from it
-    soup = BeautifulSoup(page.text, features="lxml")
-    #each product on ulta's website has a container with the class "productQvContainer" so I'm getting every element that has that as a class to pull every product
-    product_containers = soup.find_all('div', {'class' : 'productQvContainer'})
-    main_category = all_url_info[url]['main_category']
-    sub_category = all_url_info[url]['sub_category']
-    sub_sub_category = all_url_info[url]['sub_sub_category']
-    #applying the function get_single_product for each product in the url. if it throws an exception, I'm having it print the url and index so I can tell what product is having a problem.
-    for product_container in product_containers:
-        try:
-            product, product_id = get_single_product(soup, product_container, main_category, sub_category, sub_sub_category)
-            products[product_id] = product
-        except Exception as exc:
-            print(url, product_containers.index(product_container))
-            print(exc, '\n')
-    return(products)
- 
+    if page.status_code != 200:
+        print(page.raise_for_status())
+        sys.exit(1)
+    else:
+        #getting the page's content and using the package BeautifulSoup to extract data from it
+        soup = BeautifulSoup(page.text, features="lxml")
+        #each product on ulta's website has a container with the class "productQvContainer" so I'm getting every element that has that as a class to pull every product
+        product_containers = soup.find_all('div', {'class' : 'productQvContainer'})
+        main_category = all_url_info[url]['main_category']
+        sub_category = all_url_info[url]['sub_category']
+        sub_sub_category = all_url_info[url]['sub_sub_category']
+        #applying the function get_single_product for each product in the url. if it throws an exception, I'm having it print the url and index so I can tell what product is having a problem.
+        for product_container in product_containers:
+            try:
+                product, product_id = get_single_product(soup, product_container, main_category, sub_category, sub_sub_category)
+                products[product_id] = product
+            except Exception as exc:
+                print(url, product_containers.index(product_container))
+                print(exc, '\n')
+        return(products)
+
+def clean_string(string):
+    #the strings often have a bunch of extra "/n/n/n/t/t/t" in front; I want to remove them
+    if type(string) == str:
+        str_list = string.split()
+        fixed_str = " ".join(str_list)
+        return(fixed_str)
+    else:
+        return(string)
+
 def get_single_product(soup, product_container, main_category, sub_category, sub_sub_category):
     product = {}
     #get general product data from each product
@@ -107,7 +151,10 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     else:
         product_url = 'https://www.ulta.com' + product_container.find('a', {'class' : 'product'}).get('href')
     #if the correct product id isn't in the url then the url is wrong. if it's wrong, then we need to fix it.
-    if product_url.split('productId=')[1] != product_id:
+    if product_url.split('productId=')[0] == product_url:
+        if product_url.split('-')[-1] != product_id:
+            product_url = 'https://www.ulta.com/' + product['product'].replace(' ', '-').lower() + '?productId=' + product_id
+    elif product_url.split('productId=')[1] != product_id:
         product_url = 'https://www.ulta.com/' + product['product'].replace(' ', '-').lower() + '?productId=' + product_id
     product['url'] = product_url
     #getting the rating information for each product; using if statements in case a product doesn't have a rating for whatever reason
@@ -121,14 +168,14 @@ def get_single_product(soup, product_container, main_category, sub_category, sub
     #the prices are labeled differently in the code depending on whether the product is for sale or not (for sale as in marked as sale not a secret sale)
     if product_container.find('div', {'class' : 'productSale'}) is None:
         product['sale'] = 0
-        product['price'] = product_container.find('span', {'class' : 'regPrice'}).text.strip()
+        product['price'] = clean_string(product_container.find('span', {'class' : 'regPrice'}).text)
     else:
         product['sale'] = 1
-        product['price'] = product_container.find('span', {'class' : 'pro-old-price'}).text.strip()
-        product['sale_price'] = product_container.find('span', {'class' : 'pro-new-price'}).text.strip()
+        product['price'] = clean_string(product_container.find('span', {'class' : 'pro-old-price'}).text)
+        product['sale_price'] = clean_string(product_container.find('span', {'class' : 'pro-new-price'}).text)
     #getting the available offers and number of options/colors of the product if they're listed
     if product_container.find('div', {'class' : 'product-detail-offers'}) is not None:
-        product['offers'] = product_container.find('div', {'class' : 'product-detail-offers'}).text.strip()
+        product['offers'] = clean_string(product_container.find('div', {'class' : 'product-detail-offers'}).text)
     if product_container.find('span', {'class' : 'pcViewMore'}) is not None:
         product['options'] = re.sub('\xa0', ' ', product_container.find('span', {'class' : 'pcViewMore'}).text.strip())
     product['main_category'] = main_category
@@ -187,7 +234,7 @@ def get_secret_sales_not_in_df(secret_sales_df, old_secret_sales_in_stock, ulta_
     return(not_in_secret_sales_df)
 
 def get_product_in_stock(product_id, prod_dict):    
-    with webdriver.Chrome(r'/home/lermane/Downloads/chromedriver', options=chrome_options) as driver:
+    with webdriver.Chrome(r'/home/lermane/Downloads/chromedriver_linux64/chromedriver', options=chrome_options) as driver:
         wait = WebDriverWait(driver, 30)
         temp = {}
 
@@ -195,16 +242,6 @@ def get_product_in_stock(product_id, prod_dict):
 
         if driver.current_url == 'https://www.ulta.com/404.jsp': #if the product doesn't exist anymore ulta wil take you to this site
             next
-        #making sure that the url is correct
-        elif driver.current_url.split('productId=')[1] != product_id:
-            wait.until(EC.element_to_be_clickable((By.XPATH, "//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a")))
-            driver.find_element_by_xpath("//*[@id='navigation__wrapper--sticky']/div/div[1]/div[2]/div/a").click()
-            driver.find_element_by_xpath("//*[@id='searchInput']").send_keys(product_id)
-            driver.find_element_by_xpath("//*[@id='js-mobileHeader']/div/div/div/div[1]/div/div[1]/form/button").click()
-            if driver.current_url == 'https://www.ulta.com/404.jsp':
-                next
-            elif driver.current_url.split('productId=')[1] == product_id:
-                prod_dict['url'] = driver.current_url
 
         time.sleep(1)
 
@@ -250,7 +287,7 @@ def get_product_in_stock(product_id, prod_dict):
             return(variants_in_stock) 
 
 def get_products_in_stock(secret_sales, driver):
-    wait = WebDriverWait(driver, 30)
+    wait = WebDriverWait(driver, 60)
     products_in_stock = {}
     for product_id in secret_sales:
         temp = {} #used to temporarily store product data until 
@@ -269,7 +306,7 @@ def get_products_in_stock(secret_sales, driver):
                 next
             elif driver.current_url.split('productId=')[1] == product_id:
                 secret_sales[product_id]['url'] = driver.current_url
-        time.sleep(1)
+        time.sleep(5)
         #getting all the product variants from the page
         product_variants = driver.find_elements_by_class_name('ProductSwatchImage__variantHolder')
         if len(product_variants) == 0:

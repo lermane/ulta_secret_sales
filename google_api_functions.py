@@ -176,3 +176,145 @@ def Add_Conditional_Format(gsheetId, sheet_name):
     body = {'requests': [addConditionalFormatRequest]}
     service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
     print('percent_off number format successfully changed')
+    
+def Resize_Columns(gsheetId, rows):
+    #name column
+    resizeNameColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 3,
+                "endIndex" : 4
+            },
+            "properties" : {
+                "pixelSize": 323
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapNameColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 3,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 4
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    #product column
+    resizeProductColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 5,
+                "endIndex" : 6
+            },
+            "properties" : {
+                "pixelSize": 289
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapProductColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 5,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 6
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    #options column
+    resizeOptionsColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 9,
+                "endIndex" : 10
+            },
+            "properties" : {
+                "pixelSize": 246
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapOptionsColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 9,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 10
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    autoResizeColumnsRequest = {
+        "autoResizeDimensions" : {
+            "dimensions" : {
+            "sheetId": 0,
+            "dimension": "COLUMNS",
+            "startIndex": 0,
+            "endIndex" : 20
+            }
+        }
+    }
+    
+    body = {
+        'requests': [
+            autoResizeColumnsRequest, 
+            wrapNameColumnRequest, 
+            resizeNameColumnRequest, 
+            wrapProductColumnRequest, 
+            resizeProductColumnRequest,
+            wrapOptionsColumnRequest, 
+            resizeOptionsColumnRequest
+        ]
+    }
+    
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Columns successfully updated')
+
+def Resize_Rows(gsheetId, rows):
+    autoResizeRowsRequest = {
+        "autoResizeDimensions" : {
+            "dimensions" : {
+            "sheetId": 0,
+            "dimension": "ROWS",
+            "startIndex": 0,
+            "endIndex" : rows + 1
+            }
+        }
+    }
+    body = {'requests': [autoResizeRowsRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Rows successfully updated')
+

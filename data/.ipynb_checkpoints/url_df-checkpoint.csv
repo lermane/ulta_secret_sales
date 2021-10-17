@@ -1,0 +1,231 @@
+url_pkey,url,main_category,sub_category,sub_sub_category
+0,https://www.ulta.com/makeup-face?N=26y3&No=0&Nrpp=500,makeup,face, 
+1,https://www.ulta.com/makeup-face?N=26y3&No=500&Nrpp=500,makeup,face, 
+2,https://www.ulta.com/makeup-face?N=26y3&No=1000&Nrpp=500,makeup,face, 
+3,https://www.ulta.com/makeup-face?N=26y3&No=1500&Nrpp=500,makeup,face, 
+4,https://www.ulta.com/makeup-face-foundation?N=26y5&No=0&Nrpp=500,makeup,face,foundation
+5,https://www.ulta.com/makeup-face-powder?N=26y8&No=0&Nrpp=500,makeup,face,face powder
+6,https://www.ulta.com/makeup-face-concealer?N=26y6&No=0&Nrpp=500,makeup,face,concealer
+7,https://www.ulta.com/makeup-face-color-correcting?N=uo37yr&No=0&Nrpp=500,makeup,face,color correcting
+8,https://www.ulta.com/makeup-face-primer?N=26y4&No=0&Nrpp=500,makeup,face,face primer
+9,https://www.ulta.com/makeup-face-bb-cc-creams?N=277u&No=0&Nrpp=500,makeup,face,bb & cc creams
+10,https://www.ulta.com/makeup-face-blush?N=277v&No=0&Nrpp=500,makeup,face,blush
+11,https://www.ulta.com/makeup-face-bronzer?N=26y9&No=0&Nrpp=500,makeup,face,bronzer
+12,https://www.ulta.com/makeup-face-contouring?N=27eh&No=0&Nrpp=500,makeup,face,contouring
+13,https://www.ulta.com/makeup-face-highlighter?N=27i0&No=0&Nrpp=500,makeup,face,highlighter
+14,https://www.ulta.com/makeup-face-setting-spray?N=10wj5jk&No=0&Nrpp=500,makeup,face,setting spray
+15,https://www.ulta.com/makeup-face-shine-control?N=26yc&No=0&Nrpp=500,makeup,face,shine control
+16,https://www.ulta.com/skin-care-cleansers-makeup-remover?N=27gx&No=0&Nrpp=500,skin care,cleansers,makeup remover
+17,https://www.ulta.com/makeup-eyes?N=26yd&No=0&Nrpp=500,makeup,eyes, 
+18,https://www.ulta.com/makeup-eyes?N=26yd&No=500&Nrpp=500,makeup,eyes, 
+19,https://www.ulta.com/makeup-eyes?N=26yd&No=1000&Nrpp=500,makeup,eyes, 
+20,https://www.ulta.com/makeup-eyes?N=26yd&No=1500&Nrpp=500,makeup,eyes, 
+21,https://www.ulta.com/makeup-eyes-eyeshadow-palettes?N=26ye&No=0&Nrpp=500,makeup,eyes,eyeshadow palettes
+22,https://www.ulta.com/makeup-eyes-eyeshadow-palettes?N=26ye&No=500&Nrpp=500,makeup,eyes,eyeshadow palettes
+23,https://www.ulta.com/makeup-eyes-mascara?N=26yg&No=0&Nrpp=500,makeup,eyes,mascara
+24,https://www.ulta.com/makeup-eyes-eyeliner?N=26yh&No=0&Nrpp=500,makeup,eyes,eyeliner
+25,https://www.ulta.com/makeup-eyes-eyebrows?N=26yi&No=0&Nrpp=500,makeup,eyes,eyebrows
+26,https://www.ulta.com/makeup-eyes-eyeshadow?N=26yf&No=0&Nrpp=500,makeup,eyes,eyeshadow
+27,https://www.ulta.com/makeup-eyes-eyeshadow?N=26yf&No=500&Nrpp=500,makeup,eyes,eyeshadow
+28,https://www.ulta.com/makeup-eye-primer-base?N=26yl&No=0&Nrpp=500,makeup,eyes,eye primer & base
+29,https://www.ulta.com/makeup-eyes-eyelashes?N=26yj&No=0&Nrpp=500,makeup,eyes,eyelashes
+30,https://www.ulta.com/makeup-eyes-lash-primer-serums?N=jllzia&No=0&Nrpp=500,makeup,eyes,lash primer & serums
+31,https://www.ulta.com/makeup-eye-makeup-remover?N=26yk&No=0&Nrpp=500,makeup,eyes,eye makeup remover
+32,https://www.ulta.com/makeup-lips?N=26yq&No=0&Nrpp=500,makeup,lips, 
+33,https://www.ulta.com/makeup-lips?N=26yq&No=500&Nrpp=500,makeup,lips, 
+34,https://www.ulta.com/makeup-lips-lipstick?N=26ys&No=0&Nrpp=500,makeup,lips,lipstick
+35,https://www.ulta.com/makeup-lip-gloss?N=26yt&No=0&Nrpp=500,makeup,lips,lip gloss
+36,https://www.ulta.com/makeup-lip-liner?N=26yv&No=0&Nrpp=500,makeup,lips,lip liner
+37,https://www.ulta.com/makeup-lip-stain?N=26yu&No=0&Nrpp=500,makeup,lips,lip stain
+38,https://www.ulta.com/makeup-lips-treatments-balms?N=26yw&No=0&Nrpp=500,makeup,lips,treatments & balms
+39,https://www.ulta.com/makeup-lips-sets-palettes?N=26yr&No=0&Nrpp=500,makeup,lips,sets & palettes
+40,https://www.ulta.com/tools-brushes-makeup-brushes-tools?N=27hn&No=0&Nrpp=500,tools & brushes,makeup brushes & tools, 
+41,https://www.ulta.com/tools-brushes-makeup-brushes-tools?N=27hn&No=500&Nrpp=500,tools & brushes,makeup brushes & tools, 
+42,https://www.ulta.com/tools-brushes-makeup-brushes-tools-brush-sets?N=27ho&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,brush sets
+43,https://www.ulta.com/tools-brushes-makeup-brushes-tools-makeup-brushes?N=27hp&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,makeup brushes
+44,https://www.ulta.com/tools-brushes-makeup-brushes-tools-sponges-applicators?N=27hq&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,sponges & applicators
+45,https://www.ulta.com/tools-brushes-makeup-brushes-tools-brush-cleaner?N=27hr&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,brush cleaner
+46,https://www.ulta.com/tools-brushes-makeup-brushes-tools-brow-lash-tools?N=27hs&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,brow & lash tools
+47,https://www.ulta.com/tools-brushes-makeup-brushes-tools-mirrors?N=27ht&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,mirrors
+48,https://www.ulta.com/tools-brushes-makeup-brushes-tools-sharpeners?N=27hu&No=0&Nrpp=500,tools & brushes,makeup brushes & tools,sharpeners
+49,https://www.ulta.com/makeup-bags-cases?N=26zp&No=0&Nrpp=500,makeup,makeup bags & cases, 
+50,https://www.ulta.com/makeup-ulta-collection?N=26zi&No=0&Nrpp=500,makeup,ulta collection, 
+51,https://www.ulta.com/makeup-travel-size?N=2782&No=0&Nrpp=500,makeup,travel size, 
+52,https://www.ulta.com/makeup-gifts-value-sets?N=26zo&No=0&Nrpp=500,makeup,gifts & value sets, 
+53,https://www.ulta.com/makeup-gifts-value-sets?N=26zo&No=500&Nrpp=500,makeup,gifts & value sets, 
+54,https://www.ulta.com/makeup-gifts-value-sets-makeup-palettes?N=27i1&No=0&Nrpp=500,makeup,gifts & value sets,makeup palettes
+55,https://www.ulta.com/makeup-gifts-value-sets-makeup-palettes?N=27i1&No=500&Nrpp=500,makeup,gifts & value sets,makeup palettes
+56,https://www.ulta.com/makeup-gifts-value-sets-value-sets?N=27i2&No=0&Nrpp=500,makeup,gifts & value sets,value sets
+57,https://www.ulta.com/nail-polish?N=278s&No=0&Nrpp=500,nails,nail polish, 
+58,https://www.ulta.com/gel-nail-polish?N=278j&No=0&Nrpp=500,nails,gel nail polish, 
+59,https://www.ulta.com/nails-top-base-coats?N=27iq&No=0&Nrpp=500,nails,top & base coats, 
+60,https://www.ulta.com/nail-polish-stickers?N=y5vfsk&No=0&Nrpp=500,nails,nail polish stickers, 
+61,https://www.ulta.com/press-on-nails?N=lrb2l2&No=0&Nrpp=500,nails,press on nails, 
+62,https://www.ulta.com/nail-art-design?N=27br&No=0&Nrpp=500,nails,nail art & design, 
+63,https://www.ulta.com/nail-care?N=27bs&No=0&Nrpp=500,nails,nail care, 
+64,https://www.ulta.com/nail-care-removers?N=27bt&No=0&Nrpp=500,nails,nail care,removers
+65,https://www.ulta.com/nail-care-cuticle-care?N=27bv&No=0&Nrpp=500,nails,nail care,cuticle care
+66,https://www.ulta.com/nail-care-nail-treatments?N=27bw&No=0&Nrpp=500,nails,nail care,nail treatments
+67,https://www.ulta.com/nails-manicure-pedicure-tools?N=27ir&No=0&Nrpp=500,bath & body,hand & foot care,manicure & pedicure tools
+68,https://www.ulta.com/nails-gifts-value-sets?N=27c1&No=0&Nrpp=500,nails,gifts & value sets, 
+69,https://www.ulta.com/nails-ulta-collection?N=27c5&No=0&Nrpp=500,nails,ulta collection, 
+70,https://www.ulta.com/skin-care-cleansers?N=2794&No=0&Nrpp=500,skin care,cleansers, 
+71,https://www.ulta.com/skin-care-cleansers?N=2794&No=500&Nrpp=500,skin care,cleansers, 
+72,https://www.ulta.com/skin-care-cleansers?N=2794&No=1000&Nrpp=500,skin care,cleansers, 
+73,https://www.ulta.com/skin-care-cleansers-face-wash?N=27gs&No=0&Nrpp=500,skin care,cleansers,face wash
+74,https://www.ulta.com/skin-care-cleansers-cleansing-oils?N=27gt&No=0&Nrpp=500,skin care,cleansers,cleansing oils
+75,https://www.ulta.com/skin-care-cleansers-cleansing-wipes?N=27gu&No=0&Nrpp=500,skin care,cleansers,cleansing wipes
+76,https://www.ulta.com/skin-care-cleansers-exfoliators-scrubs?N=27gv&No=0&Nrpp=500,skin care,cleansers,exfoliators & scrubs
+77,https://www.ulta.com/skin-care-cleansers-toner?N=27gw&No=0&Nrpp=500,skin care,cleansers,toner
+78,https://www.ulta.com/skin-care-tools-cleansing-brushes?N=27hw&No=0&Nrpp=500,tools & brushes,skincare tools,cleansing brushes
+79,https://www.ulta.com/skin-care-moisturizers?N=2796&No=0&Nrpp=500,skin care,moisturizers, 
+80,https://www.ulta.com/skin-care-moisturizers?N=2796&No=500&Nrpp=500,skin care,moisturizers, 
+81,https://www.ulta.com/skin-care-moisturizers?N=2796&No=1000&Nrpp=500,skin care,moisturizers, 
+82,https://www.ulta.com/skin-care-face-moisturizer?N=27h9&No=0&Nrpp=500,skin care,moisturizers,face moisturizer
+83,https://www.ulta.com/skin-care-face-moisturizer?N=27h9&No=500&Nrpp=500,skin care,moisturizers,face moisturizer
+84,https://www.ulta.com/skin-care-moisturizers-night-cream?N=27ha&No=0&Nrpp=500,skin care,moisturizers,night cream
+85,https://www.ulta.com/skin-care-moisturizers-face-oil?N=27hb&No=0&Nrpp=500,skin care,moisturizers,face oil
+86,https://www.ulta.com/skin-care-moisturizers-face-mist?N=27hc&No=0&Nrpp=500,skin care,moisturizers,face mist
+87,https://www.ulta.com/skin-care-moisturizers-decollete-neck-cream?N=27hd&No=0&Nrpp=500,skin care,moisturizers,decollete & neck cream
+88,https://www.ulta.com/skin-care-tinted-moisturizer?N=5qrcc&No=0&Nrpp=500,skin care,moisturizers,tinted moisturizer
+89,https://www.ulta.com/skin-care-moisturizers-lip-care?N=27hv&No=0&Nrpp=500,skin care,moisturizers,lip care
+90,https://www.ulta.com/skin-care-treatment-serums?N=27cs&No=0&Nrpp=500,skin care,treatment & serums, 
+91,https://www.ulta.com/skin-care-treatment-serums?N=27cs&No=500&Nrpp=500,skin care,treatment & serums, 
+92,https://www.ulta.com/skin-care-treatment-serums?N=27cs&No=1000&Nrpp=500,skin care,treatment & serums, 
+93,https://www.ulta.com/skin-care-treatment-serums-face-serums?N=27he&No=0&Nrpp=500,skin care,treatment & serums,face serums
+94,https://www.ulta.com/skin-care-treatment-serums-face-serums?N=27he&No=500&Nrpp=500,skin care,treatment & serums,face serums
+95,https://www.ulta.com/skin-care-treatment-serums-facial-peels?N=27hh&No=0&Nrpp=500,skin care,treatment & serums,facial peels
+96,https://www.ulta.com/skin-care-treatment-serums-face-masks?N=27hf&No=0&Nrpp=500,skin care,treatment & serums,face masks
+97,https://www.ulta.com/skin-care-treatment-serums-sheet-masks?N=27hg&No=0&Nrpp=500,skin care,treatment & serums,sheet masks
+98,https://www.ulta.com/skin-care-treatment-serums-acne-blemish-treatments?N=27hi&No=0&Nrpp=500,skin care,treatment & serums,acne & blemish treatments
+99,https://www.ulta.com/skin-care-eye-treatments?N=270k&No=0&Nrpp=500,skin care,eye treatments, 
+100,https://www.ulta.com/skin-care-eye-treatments-eye-cream?N=27hk&No=0&Nrpp=500,skin care,eye treatments,eye cream
+101,https://www.ulta.com/skin-care-eye-treatments-eye-serums?N=27hl&No=0&Nrpp=500,skin care,eye treatments,eye serums
+102,https://www.ulta.com/skin-care-eye-treatments-eye-masks?N=27hm&No=0&Nrpp=500,skin care,eye treatments,eye masks
+103,https://www.ulta.com/skin-care-suncare?N=27fe&No=0&Nrpp=500,skin care,suncare, 
+104,https://www.ulta.com/skin-care-suncare-sunscreen?N=27ff&No=0&Nrpp=500,skin care,suncare,sunscreen
+105,https://www.ulta.com/skin-care-suncare-self-tanning-bronzing?N=27fg&No=0&Nrpp=500,skin care,suncare,self-tanning & bronzing
+106,https://www.ulta.com/skin-care-suncare-after-sun-care?N=27fh&No=0&Nrpp=500,skin care,suncare,after sun care
+107,https://www.ulta.com/skin-care-supplements?N=2712&No=0&Nrpp=500,skin care,supplements, 
+108,https://www.ulta.com/skin-care-mother-baby?N=2715&No=0&Nrpp=500,skin care,mother & baby, 
+109,https://www.ulta.com/skin-care-tools?N=2718&No=0&Nrpp=500,skin care,tools, 
+110,https://www.ulta.com/skin-care-spa-tools?N=27hx&No=0&Nrpp=500,tools & brushes,skincare tools,spa tools
+111,https://www.ulta.com/skin-care-ulta-collection?N=2713&No=0&Nrpp=500,skin care,ulta collection, 
+112,https://www.ulta.com/skin-care-travel-size?N=279d&No=0&Nrpp=500,skin care,travel size, 
+113,https://www.ulta.com/skin-care-gifts-value-sets?N=2717&No=0&Nrpp=500,skin care,gifts & value sets, 
+114,https://www.ulta.com/korean-skin-care?N=27ig&No=0&Nrpp=500,skin care,korean skin care, 
+115,https://www.ulta.com/hair-shampoo-conditioner?N=27ih&No=0&Nrpp=500,hair,shampoo & conditioner, 
+116,https://www.ulta.com/hair-shampoo-conditioner?N=27ih&No=500&Nrpp=500,hair,shampoo & conditioner, 
+117,https://www.ulta.com/hair-shampoo-conditioner?N=27ih&No=1000&Nrpp=500,hair,shampoo & conditioner, 
+118,https://www.ulta.com/hair-shampoo-conditioner-shampoo?N=27ii&No=0&Nrpp=500,hair,shampoo & conditioner,shampoo
+119,https://www.ulta.com/hair-shampoo-conditioner-shampoo?N=27ii&No=500&Nrpp=500,hair,shampoo & conditioner,shampoo
+120,https://www.ulta.com/hair-shampoo-conditioner-dry-shampoo?N=27ij&No=0&Nrpp=500,hair,shampoo & conditioner,dry shampoo
+121,https://www.ulta.com/hair-shampoo-conditioner-conditioner?N=27ik&No=0&Nrpp=500,hair,shampoo & conditioner,conditioner
+122,https://www.ulta.com/hair-shampoo-conditioner-conditioner?N=27ik&No=500&Nrpp=500,hair,shampoo & conditioner,conditioner
+123,https://www.ulta.com/hair-shampoo-conditioner-cleansing-conditioner?N=27il&No=0&Nrpp=500,hair,shampoo & conditioner,cleansing conditioner
+124,https://www.ulta.com/hair-treatment?N=26xy&No=0&Nrpp=500,hair,treatment, 
+125,https://www.ulta.com/hair-treatment?N=26xy&No=500&Nrpp=500,hair,treatment, 
+126,https://www.ulta.com/hair-treatment-oils-serums?N=27ft&No=0&Nrpp=500,hair,treatment,oils & serums
+127,https://www.ulta.com/hair-treatment-masks?N=27fu&No=0&Nrpp=500,hair,treatment,masks
+128,https://www.ulta.com/hair-treatment-hair-thinning-hair-loss?N=27fv&No=0&Nrpp=500,hair,treatment,hair thinning & hair loss
+129,https://www.ulta.com/hair-leave-in-treatment?N=27fw&No=0&Nrpp=500,hair,treatment,leave-in treatment
+130,https://www.ulta.com/hair-styling-products?N=26xf&No=0&Nrpp=500,hair,styling products, 
+131,https://www.ulta.com/hair-styling-products?N=26xf&No=500&Nrpp=500,hair,styling products, 
+132,https://www.ulta.com/hair-styling-products?N=26xf&No=1000&Nrpp=500,hair,styling products, 
+133,https://www.ulta.com/hair-styling-products-hairspray?N=27fx&No=0&Nrpp=500,hair,styling products,hairspray
+134,https://www.ulta.com/hair-styling-products-volume-texture?N=27fy&No=0&Nrpp=500,hair,styling products,volume & texture
+135,https://www.ulta.com/hair-styling-products-heat-protectant?N=27fz&No=0&Nrpp=500,hair,styling products,heat protectant
+136,https://www.ulta.com/hair-styling-products-gloss-shine?N=27g0&No=0&Nrpp=500,hair,styling products,gloss & shine
+137,https://www.ulta.com/hair-styling-products-smoothing?N=27g1&No=0&Nrpp=500,hair,styling products,smoothing
+138,https://www.ulta.com/hair-styling-products-curl-enhancing?N=27g2&No=0&Nrpp=500,hair,styling products,curl enhancing
+139,https://www.ulta.com/hair-styling-products-wax-pomade?N=27g3&No=0&Nrpp=500,hair,styling products,wax & pomade
+140,https://www.ulta.com/hair-color?N=26xs&No=0&Nrpp=500,hair,hair color, 
+141,https://www.ulta.com/hair-color-root-touch-up?N=3awspq&No=0&Nrpp=500,hair,hair color,root touch up
+142,https://www.ulta.com/natural-hair-color?N=vp2ja9&No=0&Nrpp=500,hair,hair color,natural hair color
+143,https://www.ulta.com/hair-color-hair-makeup?N=1yd56x1&No=0&Nrpp=500,hair,hair color,hair makeup
+144,https://www.ulta.com/hair-color-color-care?N=156p8kx&No=0&Nrpp=500,hair,hair color,color care
+145,https://www.ulta.com/tools-brushes-hair-styling-tools?N=27gc&No=0&Nrpp=500,tools & brushes,hair styling tools, 
+146,https://www.ulta.com/tools-brushes-hair-styling-tools-flat-irons?N=27ge&No=0&Nrpp=500,tools & brushes,hair styling tools,flat irons
+147,https://www.ulta.com/tools-brushes-hair-styling-tools-hair-dryers?N=27gd&No=0&Nrpp=500,tools & brushes,hair styling tools,hair dryers
+148,https://www.ulta.com/tools-brushes-hair-styling-tools-curling-irons-stylers?N=27gf&No=0&Nrpp=500,tools & brushes,hair styling tools,curling irons & stylers
+149,https://www.ulta.com/hair-styling-tools-hot-brushes?N=18tl1d4&No=0&Nrpp=500,tools & brushes,hair styling tools,hot brushes
+150,https://www.ulta.com/tools-brushes-hair-styling-tools-hair-rollers?N=27gh&No=0&Nrpp=500,tools & brushes,hair styling tools,hair rollers
+151,https://www.ulta.com/tools-brushes-hair-brushes-combs?N=27gj&No=0&Nrpp=500,tools & brushes,hair brushes & combs, 
+152,https://www.ulta.com/tools-brushes-accessories?N=27gk&No=0&Nrpp=500,tools & brushes,accessories, 
+153,https://www.ulta.com/tools-brushes-accessories-hair-extensions?N=27gl&No=0&Nrpp=500,tools & brushes,accessories,hair extensions
+154,https://www.ulta.com/tools-brushes-accessories-elastics?N=27gm&No=0&Nrpp=500,tools & brushes,accessories,elastics
+155,https://www.ulta.com/tools-brushes-accessories-headbands?N=27gn&No=0&Nrpp=500,tools & brushes,accessories,headbands
+156,https://www.ulta.com/tools-brushes-accessories-clips-bobby-pins?N=27go&No=0&Nrpp=500,tools & brushes,accessories,clips & bobby pins
+157,https://www.ulta.com/tools-brushes-beauty-accessories?N=27gp&No=0&Nrpp=500,tools & brushes,accessories,beauty accessories
+158,https://www.ulta.com/hair-kids-haircare?N=26xz&No=0&Nrpp=500,hair,kid's haircare, 
+159,https://www.ulta.com/hair-travel-size?N=27ci&No=0&Nrpp=500,hair,travel size, 
+160,https://www.ulta.com/hair-gifts-value-sets?N=277l&No=0&Nrpp=500,hair,gifts & value sets, 
+161,https://www.ulta.com/tools-brushes-skincare-tools?N=27g5&No=0&Nrpp=500,tools & brushes,skincare tools, 
+162,https://www.ulta.com/tools-brushes-hair-removal-tools?N=27g9&No=0&Nrpp=500,tools & brushes,hair removal tools, 
+163,https://www.ulta.com/tools-brushes-travel-size?N=447sb8&No=0&Nrpp=500,tools & brushes,travel size, 
+164,https://www.ulta.com/tools-brushes-gifts-value-sets?N=27gr&No=0&Nrpp=500,tools & brushes,gifts & value sets, 
+165,https://www.ulta.com/womens-fragrance?N=26wn&No=0&Nrpp=500,fragrance,women's fragrance, 
+166,https://www.ulta.com/womens-fragrance?N=26wn&No=500&Nrpp=500,fragrance,women's fragrance, 
+167,https://www.ulta.com/womens-fragrance-perfume?N=26wq&No=0&Nrpp=500,fragrance,women's fragrance,perfume
+168,https://www.ulta.com/womens-fragrance-rollerballs-purse-sprays?N=26wo&No=0&Nrpp=500,fragrance,women's fragrance,rollerballs & purse sprays
+169,https://www.ulta.com/womens-fragrance-body-lotions?N=26ws&No=0&Nrpp=500,fragrance,women's fragrance,body lotions
+170,https://www.ulta.com/womens-fragrance-body-mist-hair-mist?N=26wr&No=0&Nrpp=500,fragrance,women's fragrance,body mist & hair mist
+171,https://www.ulta.com/womens-fragrance-bath-shower?N=27im&No=0&Nrpp=500,fragrance,women's fragrance,bath & shower
+172,https://www.ulta.com/mens-fragrance?N=26wf&No=0&Nrpp=500,fragrance,men's fragrance, 
+173,https://www.ulta.com/mens-fragrance-cologne?N=26wg&No=0&Nrpp=500,fragrance,men's fragrance,cologne
+174,https://www.ulta.com/mens-fragrance-aftershave?N=26wi&No=0&Nrpp=500,fragrance,men's fragrance,aftershave
+175,https://www.ulta.com/mens-fragrance-bath-shower?N=27in&No=0&Nrpp=500,fragrance,men's fragrance,bath & shower
+176,https://www.ulta.com/fragrance-gift-sets?N=26wc&No=0&Nrpp=500,fragrance,fragrance gift sets, 
+177,https://www.ulta.com/fragrance-gift-sets-perfume-gift-sets?N=27io&No=0&Nrpp=500,fragrance,fragrance gift sets,perfume gift sets
+178,https://www.ulta.com/fragrance-gift-sets-cologne-gift-sets?N=27ip&No=0&Nrpp=500,fragrance,fragrance gift sets,cologne gift sets
+179,https://www.ulta.com/candles-home-fragrance?N=26wb&No=0&Nrpp=500,fragrance,candles & home fragrance, 
+180,https://www.ulta.com/bath-body-bath-shower?N=26uy&No=0&Nrpp=500,bath & body,bath & shower, 
+181,https://www.ulta.com/bath-body-bath-shower?N=26uy&No=500&Nrpp=500,bath & body,bath & shower, 
+182,https://www.ulta.com/bath-body-bath-shower-shower-gel-body-wash?N=26uz&No=0&Nrpp=500,bath & body,bath & shower,shower gel & body wash
+183,https://www.ulta.com/bath-body-bath-shower-body-scrubs-exfoliants?N=2765&No=0&Nrpp=500,bath & body,bath & shower,body scrubs & exfoliants
+184,https://www.ulta.com/bath-body-bath-shower-bubble-bath-soaks?N=26v0&No=0&Nrpp=500,bath & body,bath & shower,bubble bath & soaks
+185,https://www.ulta.com/bath-body-bath-shower-bath-bombs?N=26v2&No=0&Nrpp=500,bath & body,bath & shower,bath bombs
+186,https://www.ulta.com/bath-body-bath-shower-hand-soap-wash?N=26v1&No=0&Nrpp=500,bath & body,bath & shower,hand soap & wash
+187,https://www.ulta.com/bath-body-body-moisturizers?N=26v3&No=0&Nrpp=500,bath & body,body moisturizers, 
+188,https://www.ulta.com/bath-body-body-moisturizers-body-lotion-creams?N=26v4&No=0&Nrpp=500,bath & body,body moisturizers,body lotion & creams
+189,https://www.ulta.com/bath-body-body-moisturizers-body-oils?N=26v6&No=0&Nrpp=500,bath & body,body moisturizers,body oils
+190,https://www.ulta.com/bath-body-hand-foot-care?N=27ic&No=0&Nrpp=500,bath & body,hand & foot care, 
+191,https://www.ulta.com/bath-body-hand-foot-care-hand-cream-foot-cream?N=27id&No=0&Nrpp=500,bath & body,hand & foot care,hand cream & foot cream
+192,https://www.ulta.com/bath-body-hand-foot-care-hand-foot-treatment?N=27ie&No=0&Nrpp=500,bath & body,hand & foot care,hand & foot treatment
+193,https://www.ulta.com/bath-body-self-care-wellness?N=27i3&No=0&Nrpp=500,bath & body,self care & wellness, 
+194,https://www.ulta.com/bath-body-self-care-wellness?N=27i3&No=500&Nrpp=500,bath & body,self care & wellness, 
+195,https://www.ulta.com/bath-body-self-care-wellness-body-treatments?N=27i4&No=0&Nrpp=500,bath & body,self care & wellness,body treatments
+196,https://www.ulta.com/bath-body-self-care-wellness-aromatherapy?N=35c1hg&No=0&Nrpp=500,bath & body,self care & wellness,aromatherapy
+197,https://www.ulta.com/bath-body-self-care-wellness-deodorant?N=27i6&No=0&Nrpp=500,bath & body,self care & wellness,deodorant
+198,https://www.ulta.com/bath-body-self-care-wellness-hair-removal?N=27i5&No=0&Nrpp=500,bath & body,self care & wellness,hair removal
+199,https://www.ulta.com/bath-body-self-care-wellness-oral-care?N=27i7&No=0&Nrpp=500,bath & body,self care & wellness,oral care
+200,https://www.ulta.com/bath-body-accessories?N=27i8&No=0&Nrpp=500,bath & body,bath & body accessories, 
+201,https://www.ulta.com/bath-body-accessories-bath-sponges-towels?N=27i9&No=0&Nrpp=500,bath & body,bath & body accessories,bath sponges & towels
+202,https://www.ulta.com/bath-body-accessories-spa-essentials?N=27ia&No=0&Nrpp=500,bath & body,bath & body accessories,spa essentials
+203,https://www.ulta.com/bath-body-accessories-trend-accessories?N=27ib&No=0&Nrpp=500,bath & body,bath & body accessories,trend accessories
+204,https://www.ulta.com/bath-body-suncare?N=276b&No=0&Nrpp=500,bath & body,suncare, 
+205,https://www.ulta.com/bath-body-suncare-sunscreen?N=27fc&No=0&Nrpp=500,bath & body,suncare,sunscreen
+206,https://www.ulta.com/bath-body-suncare-self-tanning-bronzing?N=276e&No=0&Nrpp=500,bath & body,suncare,self-tanning & bronzing
+207,https://www.ulta.com/bath-body-suncare-after-sun-care?N=27fd&No=0&Nrpp=500,bath & body,suncare,after sun care
+208,https://www.ulta.com/bath-body-ulta-collection?N=26vk&No=0&Nrpp=500,bath & body,ulta collection, 
+209,https://www.ulta.com/bath-body-travel-size?N=276l&No=0&Nrpp=500,bath & body,travel size, 
+210,https://www.ulta.com/bath-body-gifts-value-sets?N=26vq&No=0&Nrpp=500,bath & body,gifts & value sets, 
+211,https://www.ulta.com/men-skin-care?N=27ck&No=0&Nrpp=500,men,skin care, 
+212,https://www.ulta.com/men-skin-care-face-wash?N=27cl&No=0&Nrpp=500,men,skin care,face wash
+213,https://www.ulta.com/men-skin-care-moisturizers-treatments?N=27cm&No=0&Nrpp=500,men,skin care,moisturizers & treatments
+214,https://www.ulta.com/men-shaving?N=u99ul3&No=0&Nrpp=500,men,shaving, 
+215,https://www.ulta.com/men-shaving-cream-razors?N=rcphjk&No=0&Nrpp=500,men,shaving,shaving cream & razors
+216,https://www.ulta.com/men-shaving-aftershave?N=3hcaqj&No=0&Nrpp=500,men,shaving,aftershave
+217,https://www.ulta.com/men-shaving-beard-care?N=u5rnk6&No=0&Nrpp=500,men,shaving,beard care
+218,https://www.ulta.com/men-body-care?N=wpkeo8&No=0&Nrpp=500,men,body care, 
+219,https://www.ulta.com/men-body-care-shower-gel-body-wash?N=7831sd&No=0&Nrpp=500,men,body care,shower gel & body wash
+220,https://www.ulta.com/men-body-care-body-lotion?N=plc7wk&No=0&Nrpp=500,men,body care,body lotion
+221,https://www.ulta.com/men-body-care-deodorant?N=uax0lc&No=0&Nrpp=500,men,body care,deodorant
+222,https://www.ulta.com/men-hair?N=26zv&No=0&Nrpp=500,men,hair, 
+223,https://www.ulta.com/men-hair-shampoo?N=26zw&No=0&Nrpp=500,men,hair,shampoo
+224,https://www.ulta.com/men-hair-conditioner?N=26zx&No=0&Nrpp=500,men,hair,conditioner
+225,https://www.ulta.com/men-hair-thinning-hair-loss?N=jfo5o&No=0&Nrpp=500,men,hair,hair thinning & hair loss
+226,https://www.ulta.com/men-hair-styling?N=26zy&No=0&Nrpp=500,men,hair,styling
+227,https://www.ulta.com/men-cologne?N=1wrfdjd&No=0&Nrpp=500,men,cologne, 
+228,https://www.ulta.com/men-travel-size?N=27cp&No=0&Nrpp=500,men,travel size, 
+229,https://www.ulta.com/men-gifts-value-sets?N=27cq&No=0&Nrpp=500,men,gifts & value sets, 

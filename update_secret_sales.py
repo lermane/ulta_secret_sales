@@ -4,6 +4,8 @@ import requests
 import copy
 import json
 import math
+import os
+import datetime
 import concurrent.futures
 import ulta_functions as ulta
 import google_api_functions as gapi
@@ -11,36 +13,38 @@ import google_sheets_credentials as creds
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
-print('starting')
+print('starting...')
 
-#print('opening session')
-#session = requests.Session()
-#all_url_info = ulta.get_url_dict(session)
 all_url_info = ulta.get_url_dict()
 urls = all_url_info.keys()
 
-print("getting product data from ulta's website")
-products = {}
-with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-    futures = {executor.submit(ulta.scrape_url, url, products, all_url_info): url for url in urls}
-    for future in concurrent.futures.as_completed(futures):
-        url = futures[future]
-        try:
-            data = future.result()
-        except Exception as exc:
-            print(url, ':', exc)
-        else:
-            products = data
-#print('closing session')            
-#session.close()
-
-print('creating ulta_df')
-#creating a df from the data
-ulta_df = (
-    pd.DataFrame.from_dict(products)
-    .transpose()
-    .rename_axis('product_id')
-)
+#getting the last time the csv with the ulta product listings was updated
+last_mod_time = os.path.getmtime('data/ulta_df.csv')
+#getting number of hours since last file modification date
+hours = ((datetime.datetime.today() - datetime.datetime.fromtimestamp(last_mod_time)).total_seconds())/60/60
+#if it was updated less than 6 hours ago, just use what's in the file. if not, pull the products again.
+if hours <= 6:
+    ulta_df = pd.read_csv('data/ulta_df.csv').set_index('product_id')
+else:
+    print("getting product data from ulta's website")
+    products = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        futures = {executor.submit(ulta.scrape_url, url, products, all_url_info): url for url in urls}
+        for future in concurrent.futures.as_completed(futures):
+            url = futures[future]
+            try:
+                data = future.result()
+            except Exception as exc:
+                print(url, ':', exc)
+            else:
+                products = data
+    print('creating ulta_df')
+    #creating a df from the data
+    ulta_df = (
+        pd.DataFrame.from_dict(products)
+        .transpose()
+        .rename_axis('product_id')
+    )
 
 print('loading in old data')
 #loading in old data from yesterday
@@ -50,6 +54,12 @@ old_ulta_df = (
     .set_index('product_id')
     .loc[:, ['old_price', 'old_sale', 'old_options']]
 )
+
+#save ulta data for future use
+today = datetime.date.today()
+file_path = "data/historic_data/ulta_df_%d%s%s.csv"%(today.year, today.strftime('%m'), today.strftime('%d'))
+ulta_df.to_csv(file_path)
+
 old_secret_sales_in_stock = (
     pd.read_csv('data/secret_sales_in_stock.csv')
     .set_index('product_id')
@@ -155,6 +165,8 @@ secret_sales_in_stock = (
     .query('percent_off != -1')
 )
 
+#secret_sales_in_stock = pd.read_csv('data/secret_sales_in_stock.csv')
+
 print('creating df that will be the data posted on the google sheets')
 #list of hyperlinks; will use to populate google doc
 hyperlink_urls = secret_sales_in_stock['url'].tolist()
@@ -167,6 +179,11 @@ df = (
     .fillna(' ')
 )
 
+print('saving data')
+secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
+ulta_df.to_csv('data/ulta_df.csv')
+df.to_csv('data/df.csv')
+
 print('updating google sheets')
 #update the sheet hosted on the mod's google drive
 gapi.Create_Service(creds.get_credentials_file('main_mod'), creds.get_token_write_file('main_mod'), 'sheets', 'v4', ['https://www.googleapis.com/auth/spreadsheets'])
@@ -175,6 +192,8 @@ gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_mod'), df)
 gapi.Update_Filter(creds.get_sheet_id('main_mod'), creds.get_filter_id('main_mod'), len(df), len(df.columns))
 gapi.Add_Hyperlinks(creds.get_sheet_id('main_mod'), df, hyperlink_urls)
 gapi.Add_Percent_Format(creds.get_sheet_id('main_mod'), len(df))
+gapi.Resize_Columns(creds.get_sheet_id('main_mod'), len(df))
+gapi.Resize_Rows(creds.get_sheet_id('main_mod'), len(df))
 
 #update the sheet hosted on my google drive
 gapi.Create_Service(creds.get_credentials_file('main_local'), creds.get_token_write_file('main_local'), 'sheets', 'v4', ['https://www.googleapis.com/auth/spreadsheets'])
@@ -183,9 +202,7 @@ gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_local'), df)
 gapi.Update_Filter(creds.get_sheet_id('main_local'), creds.get_filter_id('main_local'), len(df), len(df.columns))
 gapi.Add_Hyperlinks(creds.get_sheet_id('main_local'), df, hyperlink_urls)
 gapi.Add_Percent_Format(creds.get_sheet_id('main_local'), len(df))
-
-print('saving data')
-secret_sales_in_stock.to_csv('data/secret_sales_in_stock.csv')
-ulta_df.to_csv('data/ulta_df.csv')
+gapi.Resize_Columns(creds.get_sheet_id('main_local'), len(df))
+gapi.Resize_Rows(creds.get_sheet_id('main_local'), len(df))
 
 print('DONE')

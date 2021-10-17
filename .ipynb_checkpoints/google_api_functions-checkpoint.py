@@ -1,0 +1,320 @@
+from googleapiclient.discovery import build
+from google_auth_oauthlib.flow import InstalledAppFlow,Flow
+from google.auth.transport.requests import Request
+import os
+import pickle
+
+#variables used in the following functions
+SAMPLE_RANGE_NAME = 'A1:AA20000'
+
+#copied the next 3 functions from
+#https://medium.com/analytics-vidhya/how-to-read-and-write-data-to-google-spreadsheet-using-python-ebf54d51a72c
+
+def Create_Service(client_secret_file, token_write_file, api_service_name, api_version, *scopes):
+    global service
+    SCOPES = [scope for scope in scopes[0]]
+    
+    cred = None
+
+    if os.path.exists(token_write_file):
+        with open(token_write_file, 'rb') as token:
+            cred = pickle.load(token)
+
+    if not cred or not cred.valid:
+        if cred and cred.expired and cred.refresh_token:
+            cred.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(client_secret_file, SCOPES)
+            cred = flow.run_local_server()
+
+        with open(token_write_file, 'wb') as token:
+            pickle.dump(cred, token)
+
+    try:
+        service = build(api_service_name, api_version, credentials=cred)
+        print(api_service_name, 'service created successfully')
+    except Exception as e:
+        print(e)
+
+def Clear_Sheet(gsheetId):
+    result_clear = service.spreadsheets().values().clear(
+        spreadsheetId=gsheetId,
+        range=SAMPLE_RANGE_NAME,
+        body = {}
+    ).execute()
+    print('Sheet successfully cleared')
+
+def Export_Data_To_Sheets(gsheetId, df):
+    response_date = service.spreadsheets().values().update(
+        spreadsheetId=gsheetId,
+        valueInputOption='RAW',
+        range=SAMPLE_RANGE_NAME,
+        body=dict(
+            majorDimension='ROWS',
+            values=df.T.reset_index().T.values.tolist())
+    ).execute()
+    print('Sheet successfully updated')
+
+#updates the sale_filter view so it will change when the numbers of rows change
+def Update_Filter(gsheetId, filterId, rows, cols):
+    my_range = {
+    'sheetId': 0,
+    'startRowIndex': 0,
+    'startColumnIndex': 0,
+    'endRowIndex': rows + 1,
+    'endColumnIndex': cols
+    }
+    
+    updateFilterViewRequest = {
+        'updateFilterView': {
+            'filter': {
+                'filterViewId': filterId,
+                'range': my_range
+            },
+            'fields': {
+                'paths': 'range'
+            }
+        }
+    }
+    body = {'requests': [updateFilterViewRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Filter successfully updated')
+
+#add hyperlinks 
+def Add_Hyperlinks(gsheetId, df, hyperlink_urls):
+    addHyperlinksRequest = []
+    for i in range(len(df)):
+        hyperlink = '"' + hyperlink_urls[i] + '"'
+        hypertext = '"' + df.iloc[i]['name'] + '"'
+        request = {
+            "updateCells": {
+                "rows": [
+                    {
+                        "values": [{
+                            "userEnteredValue": {
+                                "formulaValue": "=HYPERLINK({link}, {text})".format(link = hyperlink, text = hypertext)
+                            }
+                        }]
+                    }
+                ],
+                "fields": "userEnteredValue",
+                "start": {
+                    "sheetId": 0,
+                    "rowIndex": i + 1,
+                    "columnIndex": 3
+                }
+            }
+        }
+        addHyperlinksRequest.append(request)
+    body = {'requests': addHyperlinksRequest}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Hyperlinks successfully added')
+
+#change percent_off number format in the google docs to a percent
+def Add_Percent_Format(gsheetId, rows):
+    my_range = {
+    'sheetId': 0,
+    'startRowIndex': 1,
+    'startColumnIndex': 8,
+    'endRowIndex': rows + 1,
+    'endColumnIndex': 9
+    }
+    
+    addPercentFormatRequest = {
+      "repeatCell": {
+        "range": my_range,
+        "cell": {
+          "userEnteredFormat": {
+            "numberFormat": {
+              "type": "NUMBER",
+              "pattern": "00.00%"
+            }
+          }
+        },
+        "fields": "userEnteredFormat.numberFormat"
+      }
+    }
+    body = {'requests': [addPercentFormatRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('percent_off number format successfully changed')
+
+#add the condition where, if the age column value is "new", color it orange. I only have to do this once ever.
+def Add_Conditional_Format(gsheetId, sheet_name):
+    my_range = {
+        'sheetId': 0,
+        'startRowIndex': 0,
+        'startColumnIndex': 0,
+        'endRowIndex': 160,
+        'endColumnIndex': 14
+        }
+
+    addConditionalFormatRequest = {
+          "addConditionalFormatRule": {
+            "rule": {
+              "ranges" : [my_range],
+              "booleanRule": {
+                "condition": {
+                  "type": "CUSTOM_FORMULA",
+                  "values": [
+                    {
+                      "userEnteredValue": '={sheet}!$N1="new"'.format(sheet = sheet_name)
+                    }
+                  ]
+                },
+                "format": {
+                  "backgroundColor": {
+                    "red" : 0.9764705882352941,
+                    "green" : 0.796078431372549,
+                    "blue" : 0.611764705882353
+                  }
+                }
+              }
+            },
+            "index": 0
+          }
+        }
+    body = {'requests': [addConditionalFormatRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('percent_off number format successfully changed')
+    
+def Resize_Columns(gsheetId, rows):
+    #name column
+    resizeNameColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 3,
+                "endIndex" : 4
+            },
+            "properties" : {
+                "pixelSize": 323
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapNameColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 3,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 4
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    #product column
+    resizeProductColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 5,
+                "endIndex" : 6
+            },
+            "properties" : {
+                "pixelSize": 289
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapProductColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 5,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 6
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    #options column
+    resizeOptionsColumnRequest = {
+        "updateDimensionProperties" : {
+            "range" : {
+                "sheetId" : 0,
+                "dimension" : "COLUMNS",
+                "startIndex" : 9,
+                "endIndex" : 10
+            },
+            "properties" : {
+                "pixelSize": 246
+            },
+            "fields": "pixelSize"
+        }
+    }    
+    wrapOptionsColumnRequest = {
+      "repeatCell": {
+        "range": {
+            'sheetId': 0,
+            'startRowIndex': 1,
+            'startColumnIndex': 9,
+            'endRowIndex': rows + 1,
+            'endColumnIndex': 10
+            },
+        "cell": {
+          "userEnteredFormat": {
+            "wrapStrategy": "WRAP"
+          }
+        },
+        "fields": "userEnteredFormat.wrapStrategy"
+      }
+    }
+    
+    autoResizeColumnsRequest = {
+        "autoResizeDimensions" : {
+            "dimensions" : {
+            "sheetId": 0,
+            "dimension": "COLUMNS",
+            "startIndex": 0,
+            "endIndex" : 20
+            }
+        }
+    }
+    
+    body = {
+        'requests': [
+            autoResizeColumnsRequest, 
+            wrapNameColumnRequest, 
+            resizeNameColumnRequest, 
+            wrapProductColumnRequest, 
+            resizeProductColumnRequest,
+            wrapOptionsColumnRequest, 
+            resizeOptionsColumnRequest
+        ]
+    }
+    
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Columns successfully updated')
+
+def Resize_Rows(gsheetId, rows):
+    autoResizeRowsRequest = {
+        "autoResizeDimensions" : {
+            "dimensions" : {
+            "sheetId": 0,
+            "dimension": "ROWS",
+            "startIndex": 0,
+            "endIndex" : rows + 1
+            }
+        }
+    }
+    body = {'requests': [autoResizeRowsRequest]}
+    service.spreadsheets().batchUpdate(spreadsheetId=gsheetId, body=body).execute()
+    print('Rows successfully updated')
+
