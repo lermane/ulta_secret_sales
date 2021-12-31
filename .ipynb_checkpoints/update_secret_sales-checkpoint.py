@@ -7,9 +7,8 @@ import math
 import os
 import datetime
 import concurrent.futures
-import ulta_functions as ulta
-import google_api_functions as gapi
-import google_sheets_credentials as creds
+import functions.ulta_functions as ulta
+import GoogleSheetsHandler
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 
@@ -185,24 +184,13 @@ ulta_df.to_csv('data/ulta_df.csv')
 df.to_csv('data/df.csv')
 
 print('updating google sheets')
-#update the sheet hosted on the mod's google drive
-gapi.Create_Service(creds.get_credentials_file('main_mod'), creds.get_token_write_file('main_mod'), 'sheets', 'v4', ['https://www.googleapis.com/auth/spreadsheets'])
-gapi.Clear_Sheet(creds.get_sheet_id('main_mod'))
-gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_mod'), df)
-gapi.Update_Filter(creds.get_sheet_id('main_mod'), creds.get_filter_id('main_mod'), len(df), len(df.columns))
-gapi.Add_Hyperlinks(creds.get_sheet_id('main_mod'), df, hyperlink_urls)
-gapi.Add_Percent_Format(creds.get_sheet_id('main_mod'), len(df))
-gapi.Resize_Columns(creds.get_sheet_id('main_mod'), len(df))
-gapi.Resize_Rows(creds.get_sheet_id('main_mod'), len(df))
-
-#update the sheet hosted on my google drive
-gapi.Create_Service(creds.get_credentials_file('main_local'), creds.get_token_write_file('main_local'), 'sheets', 'v4', ['https://www.googleapis.com/auth/spreadsheets'])
-gapi.Clear_Sheet(creds.get_sheet_id('main_local'))
-gapi.Export_Data_To_Sheets(creds.get_sheet_id('main_local'), df)
-gapi.Update_Filter(creds.get_sheet_id('main_local'), creds.get_filter_id('main_local'), len(df), len(df.columns))
-gapi.Add_Hyperlinks(creds.get_sheet_id('main_local'), df, hyperlink_urls)
-gapi.Add_Percent_Format(creds.get_sheet_id('main_local'), len(df))
-gapi.Resize_Columns(creds.get_sheet_id('main_local'), len(df))
-gapi.Resize_Rows(creds.get_sheet_id('main_local'), len(df))
-
+with GoogleSheetsHandler.GoogleSheetsHandler('prod') as g:
+    g.clear_sheet()
+    g.export_dataframe_to_sheets(df)
+    g.update_filter(len(df), len(df.columns))
+    g.Add_Hyperlinks(df, hyperlink_urls)
+    g.Add_Percent_Format(len(df))
+    g.Resize_Columns(len(df))
+    g.resize_rows(len(df))
+    
 print('DONE')

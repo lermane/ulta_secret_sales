@@ -6,3 +6,13 @@ google_sheets_credentials.py
 
 #ignore testing file
 secret_sales_testing.ipynb
+
+#ignore twilio
+twilio.ipynb
+
+#ignore files used to create initial database tables
+database/initial_tbls/*
+
+#ignore scraped files
+UltaScraper/data/*
+
