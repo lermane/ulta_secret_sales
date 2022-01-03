@@ -35,6 +35,7 @@ class UltaDBHandler:
     def __enter__(self):
         # This ensure, whenever an object is created using "with"
         # this magic method is called, where you can create the connection.
+        print('Connecting to the PostgreSQL database...')
         self._params = config()
         self._conn = psycopg2.connect(**self._params)
         self._cur = self._conn.cursor()
@@ -47,8 +48,11 @@ class UltaDBHandler:
             self._cur.close()
             self._conn.commit()
             self._conn.close()
+            print('Connection to PostgreSQL database successfully closed.')
         except AttributeError: # isn't closable
             print('Not closable.')
+        except (Exception, psycopg2.DatabaseError) as error:
+            print(error)
             return True # exception handled successfully
 
     def add_products(self, products):

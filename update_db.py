@@ -1,7 +1,8 @@
-import APIParsingFunctions as apf
-import UpdateDBFunctions as udf
+import UltaScraper.APIParsingFunctions as apf
+import database.UpdateDBFunctions as udf
 import concurrent.futures
 import database.UltaDBHandler as UltaDBHandler
+import time
 
 
 #get product ids to scrape
@@ -9,6 +10,9 @@ productIds = udf.get_product_ids()
 
 #scrape product and sku data using their respective apis
 if productIds != []:
+    print('scraping product api...')
+    start = time.time()
+
     productsDict = {}
     skusDict = {}
     skusDirectoryDict = {}
@@ -27,6 +31,7 @@ if productIds != []:
                 
     skuIds = apf.get_skus_to_scrape(skusDirectoryDict, productsDict)
     
+    print('scraping sku api...')
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
         future2skuId = {executor.submit(apf.get_sku_data, skuId):skuId for skuId in skuIds}
         for future in concurrent.futures.as_completed(future2skuId):
@@ -42,7 +47,14 @@ if productIds != []:
     products = apf.clean_products(productsDict)
     skus = apf.clean_skus(skusDict, skusDirectoryDict)
     
-#update ultadb
+    end = time.time()
+    
+    print('total time:', (end-start)/60)
+    print('per product_id:', ((end-start)/60)/len(productIds))
+    
+    #update ultadb
+    print('update ultadb...')
+    
     with UltaDBHandler.UltaDBHandler() as ulta_db:
         ulta_db.add_products(products)
         ulta_db.add_category(category)
@@ -50,5 +62,7 @@ if productIds != []:
         ulta_db.add_skus(skus)
         ulta_db.add_prices(skus)
         
+    print('update is complete.')
+        
 else:
-    print('ulta_db is up to date!')
+    print('ultadb is up to date!')

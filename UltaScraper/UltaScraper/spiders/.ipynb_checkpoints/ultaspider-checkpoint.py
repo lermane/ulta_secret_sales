@@ -4,7 +4,7 @@ from scrapy.loader import ItemLoader
 
 
 def get_urls():
-    with open("data/urls.txt","r") as f:
+    with open("/home/lermane/Documents/ulta_secret_sales/UltaScraper/data/urls.txt","r") as f:
         u = f.read()
     
     urls = [i for i in u.split('\n') if i != '']   

@@ -13,6 +13,6 @@ echo 'UPDATING ULTA DATABASE...'
 python3 update_db.py
 
 echo 'UPDATING GOOGLE SHEET...'
-python3 secret_sales.py
+python3 update_googlesheets.py
 
 echo 'DONE!'
