@@ -12,3 +12,9 @@ database/initial_tbls/*
 #ignore scraped files
 UltaScraper/data/*
 
+#ignore __pychache__
+__pycache__
+
+#ignore checkpoints
+.ipynb_checkpoints
+
