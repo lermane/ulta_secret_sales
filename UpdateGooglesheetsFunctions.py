@@ -3,6 +3,7 @@
 import database.UltaDBHandler as UltaDBHandler
 import UltaScraper.APIParsingFunctions as apf
 import pandas as pd
+import numpy as np
 
 
 
@@ -119,10 +120,15 @@ def get_data_for_excel(skusDict, testing=0):
         .loc[:, ['product_id', 'category', 'sub_category', 'sub_sub_category', 'brand_name', 'product_name', 'current_price', 'max_price' ,'percent_off', 'variants', 'offers', 'url']]
         .drop_duplicates()
         .dropna(subset=['url'])
-        .reset_index(drop=True)
         .fillna(' ')
-        .sort_values('product_id')
     )
+    
+    offers = []
+    for index, row in secretSales.iterrows():
+        if 'sale' in row['offers'].lower():
+            offers.append(np.nan)
+        else:
+            offers.append(row['offers'])
 
     productNames = []
     for index, row in secretSales.iterrows():
@@ -132,10 +138,18 @@ def get_data_for_excel(skusDict, testing=0):
             productNames.append(row['product_name'])
 
     secretSales['product_name'] = productNames
+    secretSales['offers'] = offers
 
     urls = secretSales['url'].tolist()
 
-    secretSales = secretSales.drop(columns={'url'})
+    secretSales = (
+        secretSales
+        .drop(columns={'url'})
+        .dropna(subset=['offers'])
+        .fillna(' ')
+        .reset_index(drop=True)
+        .sort_values('product_id')
+    )
 
     if testing == 0:
         secretSales = secretSales.drop(columns={'product_id'})
