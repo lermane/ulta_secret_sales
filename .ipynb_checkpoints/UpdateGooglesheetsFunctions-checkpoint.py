@@ -142,7 +142,6 @@ def get_data_for_excel(skusDict, testing=0):
 
     secretSales = (
         secretSales
-        .drop(columns={'url'})
         .dropna(subset=['offers'])
         .fillna(' ')
         .reset_index(drop=True)
@@ -150,6 +149,8 @@ def get_data_for_excel(skusDict, testing=0):
     )
     
     urls = secretSales['url'].tolist()
+    
+    secretSales = secretSales.drop(columns={'url'})
 
     if testing == 0:
         secretSales = secretSales.drop(columns={'product_id'})
