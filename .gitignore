@@ -13,7 +13,7 @@ UltaScraper/data/*
 __pycache__/*
 
 #ignore checkpoints
-.ipynb_checkpoints
+.ipynb_checkpoints/*
 
 #ignore archive folder
 archive/*
