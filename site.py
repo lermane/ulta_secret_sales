@@ -13,7 +13,7 @@ red = '#C51E42'
 light_grey = '#F6F6F6'
 #=-----------------------
 
-df = pd.read_csv('data/ss.csv')
+df = pd.read_csv('ss.csv')
 
 app = dash.Dash(__name__)
 

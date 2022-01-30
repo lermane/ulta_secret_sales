@@ -105,6 +105,7 @@ class UltaDBHandler:
         args_str = args_str.replace('\'NaN\'::float', 'NULL')
         self._cur.execute("INSERT INTO price (fk_sku_id, list_price, sale_price, insert_timestamp) VALUES " + args_str)
         
+        
     def execute(self, query):
         response = ''
         try:

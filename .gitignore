@@ -18,3 +18,5 @@ __pycache__
 #ignore checkpoints
 .ipynb_checkpoints
 
+#ignore archive folder
+archive/*

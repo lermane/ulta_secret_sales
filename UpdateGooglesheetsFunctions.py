@@ -7,7 +7,6 @@ import numpy as np
 
 
 
-
 def get_secret_sales_in_stock(skusDict):
     """ I want there to be one row for each product/current_price/offers grouping*. first I am creating
     the dataframe groupVariants which contains just that. I am then rejoining that dataframe to the 

@@ -3,6 +3,7 @@ from UltaScraper.Exceptions import HTTPError
 import pandas as pd
 from enum import Enum
 
+
 class APIEndpoint(Enum):
     PRODUCT = "https://www.ulta.com/services/v5/catalog/product/"
     SKU = "https://www.ulta.com/services/v5/catalog/sku/"

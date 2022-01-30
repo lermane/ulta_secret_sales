@@ -3,19 +3,18 @@
 import json
 import datetime
 import pandas as pd
+import glob
+import os.path
 
-
-month = datetime.date.today().month
-day = datetime.date.today().day
-year = datetime.date.today().year
-yesterdayMonth = (datetime.date.today() - datetime.timedelta(1)).month
-yesterdayDay = (datetime.date.today() - datetime.timedelta(1)).day
-yesterdayYear = (datetime.date.today() - datetime.timedelta(1)).year
 
 
 def _get_today_ulta():
     """ returns today's ulta json file from scrapy """
-    file = 'UltaScraper/data/ulta/ulta_%d_%d_%d.json'%(month, day, year)
+    folder_path = r'UltaScraper/data/ulta'
+    file_type = '/*json'
+    files = glob.glob(folder_path + file_type)
+    file = max(files, key=os.path.getctime)
+
     with open(file,'r') as f:
         ultaJson = json.loads(f.read())
         
@@ -26,7 +25,11 @@ def _get_today_ulta():
 
 def _get_yesterday_ulta():
     """ returns yesterday's ulta json file from scrapy """
-    file = 'UltaScraper/data/ulta/ulta_%d_%d_%d.json'%(yesterdayMonth, yesterdayDay, yesterdayYear)
+    folder_path = r'UltaScraper/data/ulta'
+    file_type = '/*json'
+    files = glob.glob(folder_path + file_type)
+    file = sorted(files, key=os.path.getctime)[-2]
+    
     with open(file,'r') as f:
         ultaJson = json.loads(f.read())
             

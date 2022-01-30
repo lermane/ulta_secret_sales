@@ -14,6 +14,15 @@ def get_feed_uri():
         
     return(filePath)
 
+def get_log_file():
+    month = datetime.date.today().month
+    day = datetime.date.today().day
+    year = datetime.date.today().year
+    
+    filePath = 'data/logs/log_%d_%d_%d.txt'%(month, day, year)
+        
+    return(filePath)
+
 
 # Scrapy settings for UltaScraper project
 #
@@ -44,7 +53,7 @@ FEED_FORMAT = "json"
 FEED_URI = get_feed_uri()
 
 # Where log files are stored
-LOG_FILE = 'data/log.txt'
+LOG_FILE = get_log_file()
 
 # Configure maximum concurrent requests performed by Scrapy (default: 16)
 #CONCURRENT_REQUESTS = 32

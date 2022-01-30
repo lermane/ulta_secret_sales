@@ -2,6 +2,7 @@ import UltaScraper.APIParsingFunctions as apf
 import database.UpdateDBFunctions as udf
 import concurrent.futures
 import database.UltaDBHandler as UltaDBHandler
+from UltaScraper.Exceptions import HTTPError
 import time
 
 
@@ -26,6 +27,8 @@ if productIds != []:
                 skusDirectoryDict.update(skuDirectory)
                 productsDict.update(productDict)
                 skusDict.update(skuDict)
+            except HTTPError as http_exc:
+                print('%r generated an exception: %s' % (productId, http_exc.msg))
             except Exception as exc:
                 print('%r generated an exception: %s' % (productId, exc))
                 
@@ -39,8 +42,10 @@ if productIds != []:
             try:
                 skuDict = future.result()
                 skusDict.update(skuDict)
+            except HTTPError as http_exc:
+                print('%r generated an exception: %s' % (productId, http_exc.msg))
             except Exception as exc:
-                print('%r generated an exception: %s' % (skuId, exc))
+                print('%r generated an exception: %s' % (productId, exc))
             
     category = apf.parse_category(productsDict)
     categoryDirectory = apf.get_category_directory(productsDict)  
