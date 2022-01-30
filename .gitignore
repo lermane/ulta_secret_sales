@@ -3,9 +3,6 @@
 *.pickle
 *.ini
 
-#ignore twilio
-archive/twilio.ipynb
-
 #ignore files used to create initial database tables
 database/initial_tbls/*
 
