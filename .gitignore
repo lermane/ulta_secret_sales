@@ -20,3 +20,6 @@ __pycache__
 
 #ignore archive folder
 archive/*
+
+#ignore site folder
+site/*
