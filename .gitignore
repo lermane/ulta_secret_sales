@@ -10,7 +10,7 @@ database/initial_tbls/*
 UltaScraper/data/*
 
 #ignore __pycache__
-__pycache__
+__pycache__/*
 
 #ignore checkpoints
 .ipynb_checkpoints
