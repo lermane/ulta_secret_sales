@@ -1,7 +1,18 @@
 import requests
 from UltaScraper.Exceptions import HTTPError
+from UltaScraper.Exceptions import NoDataError
+from UltaScraper.Exceptions import MessagesExistError
 import pandas as pd
 from enum import Enum
+import json
+
+
+def is_json(myjson):
+    try:
+        json.loads(myjson)
+    except ValueError as e:
+        return False
+    return True
 
 
 class APIEndpoint(Enum):
@@ -25,10 +36,17 @@ class APIHandler:
         
     def get(self):
         with requests.get(self._url) as r:
-            if r.status_code == 200:
+            if r.status_code == 200 and is_json(r.text):
                 rJson = r.json()
             else:
                 raise HTTPError(r.text)
+             
+            if 'data' not in rJson:
+                raise NoDataError(self._idValue)
+                
+            if 'messages' in rJson['data']:
+                raise MessagesExistError(rJson['data']['messages'])
+            
             return(rJson)
     
     

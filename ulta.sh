@@ -2,6 +2,8 @@
 
 echo 'STARTING...'
 
+source "../../environments/ulta_env/bin/activate"
+
 cd UltaScraper
 
 echo 'CRAWLING ULTA...'

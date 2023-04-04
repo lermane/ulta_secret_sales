@@ -23,7 +23,10 @@ with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
             skuDict = future.result()
             skusDict.update(skuDict)
         except Exception as exc:
-            print('%r generated an exception: %s' % (skuId, exc))    
+            if hasattr(exc, 'msg'):
+                print('%r generated an exception: %s' % (skuId, exc.msg))
+            else:
+                print('%r generated an exception: %s' % (skuId, exc))
 
 
 #get the data into the format needed to be posted to googlesheets

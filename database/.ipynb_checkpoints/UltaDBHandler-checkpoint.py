@@ -23,11 +23,13 @@ def config(filename='/home/lermane/Documents/ulta_secret_sales/database/database
 
 #code used as example: https://stackoverflow.com/questions/37648667/python-how-to-initiate-and-close-a-mysql-connection-inside-a-class
 class UltaDBHandler:
+    _server: str
     _params: dict
     _conn: psycopg2.extensions.connection
     _cur: psycopg2.extensions.cursor
         
-    def __init__(self):
+    def __init__(self, server='postgresql'):
+        self._server = server
         self._params = None
         self._conn = None
         self._cur = None
@@ -36,7 +38,7 @@ class UltaDBHandler:
         # This ensure, whenever an object is created using "with"
         # this magic method is called, where you can create the connection.
         print('Connecting to the PostgreSQL database...')
-        self._params = config()
+        self._params = config(section=self._server)
         self._conn = psycopg2.connect(**self._params)
         self._cur = self._conn.cursor()
         return self
@@ -114,6 +116,11 @@ class UltaDBHandler:
         except Exception as exc:
             print('ERROR!', query, exc)
             self._cur.execute('rollback;')
+        return response
+    
+    
+    def test(self):
+        response = self.execute('SELECT * FROM product')
         return response
     
     

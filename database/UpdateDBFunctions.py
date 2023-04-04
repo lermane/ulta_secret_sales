@@ -70,6 +70,8 @@ def get_product_ids():
             'yest_price': 'NA'
         })
     )
+    ultaMerge['sale_price'] = ultaMerge.get('sale_price', 'NA')
+    ultaMerge['old_price'] = ultaMerge.get('old_price', 'NA')    
     
     newProducts = ultaMerge.query("_merge != 'both'")['product_id'].tolist()
     changedPrice = ultaMerge.query("price != yest_price & _merge == 'both'")['product_id'].tolist()
